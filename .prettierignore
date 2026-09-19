@@ -1,0 +1,7 @@
+node_modules
+.next
+dist
+target
+coverage
+package-lock.json
+*.svg

@@ -1,0 +1,27 @@
+{
+  "name": "markdesk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mark-relative OTC orders for tokenized private markets on Solana.",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @markdesk/web",
+    "build": "npm run build --workspaces --if-present",
+    "check": "npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "publisher": "npm run start --workspace @markdesk/publisher"
+  },
+  "engines": {
+    "node": ">=20.9"
+  },
+  "devDependencies": {
+    "prettier": "3.9.8"
+  },
+  "license": "MIT"
+}

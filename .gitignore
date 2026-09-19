@@ -1,0 +1,33 @@
+# JavaScript
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Anchor / Rust
+target/
+.anchor/
+test-ledger/
+.cargo/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*keypair.json
+
+# Publisher runtime state
+var/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*

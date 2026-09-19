@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible defect
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: Include commit, commands, cluster, and transaction signature when relevant.
+    validations:
+      required: true
+  - type: checkboxes
+    id: funds
+    attributes:
+      label: Impact
+      options:
+        - label: This may affect funds or authorization checks; I will report details privately.
