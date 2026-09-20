@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  MARKDESK_FLAGSHIP_MINT,
+  PRESTOCKS_MINTS,
   buildMarkPayloads,
   calculatePremiumBps,
   canonicalMarkPayload,
@@ -14,7 +16,7 @@ const row = {
   description: "A test description",
   image: "https://example.com/spacex.png",
   external_url: "https://example.com/spacex",
-  contract_address: "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+  contract_address: PRESTOCKS_MINTS.SPACEX,
   markPrice: 152.5,
   markValuation: 2_000_000_000_000,
   tokenPrice: 121.25,
@@ -27,6 +29,11 @@ test("normalizes and sorts PreStocks data", () => {
   assert.equal(assets[0]?.symbol, "SPACEX");
   assert.equal(assets[0]?.markPriceE6, "152500000");
   assert.equal(assets[0]?.premiumBps, -2049);
+});
+
+test("pins the reviewed flagship to the Anduril mint rather than a mutable symbol", () => {
+  assert.equal(MARKDESK_FLAGSHIP_MINT, PRESTOCKS_MINTS.ANDURIL);
+  assert.notEqual(MARKDESK_FLAGSHIP_MINT, PRESTOCKS_MINTS.SPACEX);
 });
 
 test("rejects duplicate mint addresses", () => {

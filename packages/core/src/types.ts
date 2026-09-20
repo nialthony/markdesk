@@ -37,11 +37,27 @@ export interface MarketCatalog {
 }
 
 export interface QuoteInput {
+  /** Amount the buyer actually receives after Token-2022 transfer fees. */
   baseAmountRaw: bigint;
   baseDecimals: number;
   quoteDecimals: number;
   markPriceE6: bigint;
   offsetBps: number;
+  /** Active Token-2022 scaled-UI multiplier, fixed at 1e9. Defaults to 1e9. */
+  uiMultiplierE9?: bigint;
+}
+
+export interface TransferFeeTerms {
+  basisPoints: number;
+  maximumFeeRaw: bigint;
+}
+
+export interface FeeAwareSellAmounts {
+  sellerGrossDepositRaw: bigint;
+  inboundFeeRaw: bigint;
+  vaultSpendableRaw: bigint;
+  outboundFeeRaw: bigint;
+  buyerNetRaw: bigint;
 }
 
 export interface MarkPayload {

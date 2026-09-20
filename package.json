@@ -11,17 +11,24 @@
   "scripts": {
     "dev": "npm run dev --workspace @markdesk/web",
     "build": "npm run build --workspaces --if-present",
-    "check": "npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "check": "npm run typecheck:tools && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json",
     "test": "npm run test --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "publisher": "npm run start --workspace @markdesk/publisher"
+    "publisher": "npm run start --workspace @markdesk/publisher",
+    "inspect:mints": "tsx scripts/inspect-prestocks.ts"
   },
   "engines": {
     "node": ">=20.9"
   },
   "devDependencies": {
-    "prettier": "3.9.8"
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.99.0",
+    "@types/node": "^20.17.0",
+    "prettier": "3.9.8",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2"
   },
   "license": "MIT"
 }

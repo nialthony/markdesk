@@ -3,6 +3,19 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
+    token_2022::spl_token_2022::{
+        extension::{
+            pausable::PausableConfig, scaled_ui_amount::ScaledUiAmountConfig,
+            transfer_fee::TransferFeeConfig, transfer_hook, BaseStateWithExtensions,
+            StateWithExtensions,
+        },
+        state::Mint as SplMint,
+        ID as TOKEN_2022_PROGRAM_ID,
+    },
+    token_2022_extensions::{
+        harvest_withheld_tokens_to_mint, transfer_checked_with_fee, HarvestWithheldTokensToMint,
+        TransferCheckedWithFee,
+    },
     token_interface::{self, CloseAccount, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
 
@@ -113,12 +126,15 @@ pub mod markdesk {
     pub fn create_offer(
         ctx: Context<CreateOffer>,
         offer_id: u64,
-        base_amount: u64,
+        gross_base_amount: u64,
+        minimum_escrowed_amount: u64,
         offset_bps: i16,
         expires_at: i64,
     ) -> Result<()> {
-        let now = Clock::get()?.unix_timestamp;
-        require!(base_amount > 0, MarkDeskError::InvalidAmount);
+        let clock = Clock::get()?;
+        let now = clock.unix_timestamp;
+        require!(gross_base_amount > 0, MarkDeskError::InvalidAmount);
+        require!(minimum_escrowed_amount > 0, MarkDeskError::InvalidAmount);
         validate_offset(offset_bps)?;
         require!(expires_at > now, MarkDeskError::InvalidExpiry);
         require!(
@@ -131,24 +147,40 @@ pub mod markdesk {
             ctx.accounts.config.max_mark_age_seconds,
         )?;
 
-        transfer_checked(
+        let transfer = inspect_base_transfer(
+            &ctx.accounts.base_token_program,
+            &ctx.accounts.base_mint,
+            clock.epoch,
+            gross_base_amount,
+        )?;
+        require!(transfer.net_amount > 0, MarkDeskError::NetAmountZero);
+        require!(
+            transfer.net_amount >= minimum_escrowed_amount,
+            MarkDeskError::MinimumEscrowNotMet
+        );
+
+        let vault_before = ctx.accounts.vault.amount;
+        execute_base_transfer(
             &ctx.accounts.base_token_program,
             &ctx.accounts.maker_base_account,
             &ctx.accounts.base_mint,
             &ctx.accounts.vault,
             &ctx.accounts.maker.to_account_info(),
-            base_amount,
+            transfer,
             ctx.accounts.base_mint.decimals,
             None,
         )?;
-
-        // V1 fails closed for transfer-fee assets. A later adapter will support
-        // explicit gross-up and net-receive terms instead of silently changing size.
         ctx.accounts.vault.reload()?;
+        let escrowed_amount = ctx
+            .accounts
+            .vault
+            .amount
+            .checked_sub(vault_before)
+            .ok_or(MarkDeskError::ArithmeticOverflow)?;
         require_eq!(
-            ctx.accounts.vault.amount,
-            base_amount,
-            MarkDeskError::UnsupportedTransferBehavior
+            escrowed_amount,
+            transfer.net_amount,
+            MarkDeskError::UnexpectedTransferDelta
         );
 
         let offer = &mut ctx.accounts.offer;
@@ -156,7 +188,9 @@ pub mod markdesk {
         offer.base_mint = ctx.accounts.base_mint.key();
         offer.quote_mint = ctx.accounts.config.quote_mint;
         offer.offer_id = offer_id;
-        offer.base_amount = base_amount;
+        // The order inventory is the spendable amount credited to the vault.
+        // A later outbound transfer fee is priced against the buyer's actual net receipt.
+        offer.base_amount = escrowed_amount;
         offer.offset_bps = offset_bps;
         offer.created_at = now;
         offer.expires_at = expires_at;
@@ -166,30 +200,75 @@ pub mod markdesk {
             offer: offer.key(),
             maker: offer.maker,
             base_mint: offer.base_mint,
-            base_amount,
+            gross_deposit_amount: gross_base_amount,
+            escrowed_amount,
+            inbound_transfer_fee: transfer.fee_amount,
             offset_bps,
             expires_at,
         });
         Ok(())
     }
 
-    pub fn fill_offer(ctx: Context<FillOffer>) -> Result<()> {
-        let now = Clock::get()?.unix_timestamp;
+    pub fn fill_offer(
+        ctx: Context<FillOffer>,
+        expected_mark_sequence: u64,
+        minimum_buyer_net_amount: u64,
+        maximum_quote_amount: u64,
+    ) -> Result<()> {
+        let clock = Clock::get()?;
+        let now = clock.unix_timestamp;
         let offer = &ctx.accounts.offer;
         require!(now <= offer.expires_at, MarkDeskError::OfferExpired);
+        require!(minimum_buyer_net_amount > 0, MarkDeskError::InvalidAmount);
+        require!(maximum_quote_amount > 0, MarkDeskError::InvalidAmount);
+        require_eq!(
+            ctx.accounts.mark.sequence,
+            expected_mark_sequence,
+            MarkDeskError::UnexpectedMarkSequence
+        );
+        require_eq!(
+            ctx.accounts.vault.amount,
+            offer.base_amount,
+            MarkDeskError::VaultBalanceMismatch
+        );
         assert_mark_fresh(
             &ctx.accounts.mark,
             now,
             ctx.accounts.config.max_mark_age_seconds,
         )?;
 
-        let quote_amount = calculate_quote_raw(
+        let base_transfer = inspect_base_transfer(
+            &ctx.accounts.base_token_program,
+            &ctx.accounts.base_mint,
+            clock.epoch,
             offer.base_amount,
+        )?;
+        require!(base_transfer.net_amount > 0, MarkDeskError::NetAmountZero);
+        require!(
+            base_transfer.net_amount >= minimum_buyer_net_amount,
+            MarkDeskError::MinimumBuyerNetNotMet
+        );
+        let scaled_buyer_amount = scaled_amount_for_quote(
+            &ctx.accounts.base_token_program,
+            &ctx.accounts.base_mint,
+            base_transfer.net_amount,
+            now,
+        )?;
+        require!(scaled_buyer_amount > 0, MarkDeskError::NetAmountZero);
+
+        // The taker pays for the Token-2022 amount that actually reaches their
+        // account, expressed using the mint's currently active scaled-UI multiplier.
+        let quote_amount = calculate_quote_raw(
+            scaled_buyer_amount,
             ctx.accounts.base_mint.decimals,
             ctx.accounts.quote_mint.decimals,
             ctx.accounts.mark.price_e6,
             offer.offset_bps,
         )?;
+        require!(
+            quote_amount <= maximum_quote_amount,
+            MarkDeskError::MaximumQuoteExceeded
+        );
 
         let maker_quote_before = ctx.accounts.maker_quote_account.amount;
         transfer_checked(
@@ -212,7 +291,7 @@ pub mod markdesk {
         require_eq!(
             maker_received,
             quote_amount,
-            MarkDeskError::UnsupportedTransferBehavior
+            MarkDeskError::UnsupportedQuoteTransfer
         );
 
         let maker_key = ctx.accounts.maker.key();
@@ -226,17 +305,18 @@ pub mod markdesk {
         ];
 
         let taker_base_before = ctx.accounts.taker_base_account.amount;
-        transfer_checked(
+        execute_base_transfer(
             &ctx.accounts.base_token_program,
             &ctx.accounts.vault,
             &ctx.accounts.base_mint,
             &ctx.accounts.taker_base_account,
             &ctx.accounts.offer.to_account_info(),
-            offer.base_amount,
+            base_transfer,
             ctx.accounts.base_mint.decimals,
             Some(signer_seeds),
         )?;
         ctx.accounts.taker_base_account.reload()?;
+        ctx.accounts.vault.reload()?;
         let taker_received = ctx
             .accounts
             .taker_base_account
@@ -245,10 +325,22 @@ pub mod markdesk {
             .ok_or(MarkDeskError::ArithmeticOverflow)?;
         require_eq!(
             taker_received,
-            offer.base_amount,
-            MarkDeskError::UnsupportedTransferBehavior
+            base_transfer.net_amount,
+            MarkDeskError::UnexpectedTransferDelta
+        );
+        require_eq!(
+            ctx.accounts.vault.amount,
+            0,
+            MarkDeskError::VaultBalanceMismatch
         );
 
+        if base_transfer.has_fee_extension {
+            harvest_vault_fees(
+                &ctx.accounts.base_token_program,
+                &ctx.accounts.base_mint,
+                &ctx.accounts.vault,
+            )?;
+        }
         close_token_account(
             &ctx.accounts.base_token_program,
             &ctx.accounts.vault,
@@ -261,7 +353,10 @@ pub mod markdesk {
             offer: offer.key(),
             maker: offer.maker,
             taker: ctx.accounts.taker.key(),
-            base_amount: offer.base_amount,
+            gross_base_amount: offer.base_amount,
+            buyer_net_base_amount: base_transfer.net_amount,
+            outbound_transfer_fee: base_transfer.fee_amount,
+            scaled_quote_base_amount: scaled_buyer_amount,
             quote_amount,
             mark_price_e6: ctx.accounts.mark.price_e6,
             mark_sequence: ctx.accounts.mark.sequence,
@@ -269,7 +364,7 @@ pub mod markdesk {
         Ok(())
     }
 
-    pub fn cancel_offer(ctx: Context<CancelOffer>) -> Result<()> {
+    pub fn cancel_offer(ctx: Context<CancelOffer>, minimum_return_amount: u64) -> Result<()> {
         let offer = &ctx.accounts.offer;
         let maker_key = ctx.accounts.maker.key();
         let offer_id_bytes = offer.offer_id.to_le_bytes();
@@ -280,18 +375,75 @@ pub mod markdesk {
             offer_id_bytes.as_ref(),
             bump.as_ref(),
         ];
-        let amount = ctx.accounts.vault.amount;
-
-        transfer_checked(
+        let gross_amount = ctx.accounts.vault.amount;
+        let mut returned_amount = 0;
+        let mut transfer_fee = 0;
+        let mut has_fee_extension = mint_has_transfer_fee_extension(
             &ctx.accounts.base_token_program,
-            &ctx.accounts.vault,
             &ctx.accounts.base_mint,
-            &ctx.accounts.maker_base_account,
-            &ctx.accounts.offer.to_account_info(),
-            amount,
-            ctx.accounts.base_mint.decimals,
-            Some(signer_seeds),
         )?;
+
+        // A permanent delegate can remove inventory from a vault. Cancellation
+        // must still let the maker recover account rent if the spendable balance is zero.
+        if gross_amount == 0 {
+            require!(
+                minimum_return_amount == 0,
+                MarkDeskError::MinimumReturnNotMet
+            );
+        }
+        if gross_amount > 0 {
+            let transfer = inspect_base_transfer(
+                &ctx.accounts.base_token_program,
+                &ctx.accounts.base_mint,
+                Clock::get()?.epoch,
+                gross_amount,
+            )?;
+            has_fee_extension = transfer.has_fee_extension;
+            returned_amount = transfer.net_amount;
+            transfer_fee = transfer.fee_amount;
+            require!(
+                returned_amount >= minimum_return_amount,
+                MarkDeskError::MinimumReturnNotMet
+            );
+
+            let maker_base_before = ctx.accounts.maker_base_account.amount;
+            execute_base_transfer(
+                &ctx.accounts.base_token_program,
+                &ctx.accounts.vault,
+                &ctx.accounts.base_mint,
+                &ctx.accounts.maker_base_account,
+                &ctx.accounts.offer.to_account_info(),
+                transfer,
+                ctx.accounts.base_mint.decimals,
+                Some(signer_seeds),
+            )?;
+            ctx.accounts.maker_base_account.reload()?;
+            ctx.accounts.vault.reload()?;
+            let maker_received = ctx
+                .accounts
+                .maker_base_account
+                .amount
+                .checked_sub(maker_base_before)
+                .ok_or(MarkDeskError::ArithmeticOverflow)?;
+            require_eq!(
+                maker_received,
+                returned_amount,
+                MarkDeskError::UnexpectedTransferDelta
+            );
+            require_eq!(
+                ctx.accounts.vault.amount,
+                0,
+                MarkDeskError::VaultBalanceMismatch
+            );
+        }
+
+        if has_fee_extension {
+            harvest_vault_fees(
+                &ctx.accounts.base_token_program,
+                &ctx.accounts.base_mint,
+                &ctx.accounts.vault,
+            )?;
+        }
         close_token_account(
             &ctx.accounts.base_token_program,
             &ctx.accounts.vault,
@@ -303,7 +455,9 @@ pub mod markdesk {
         emit!(OfferCancelled {
             offer: offer.key(),
             maker: offer.maker,
-            returned_amount: amount,
+            gross_return_amount: gross_amount,
+            maker_net_return_amount: returned_amount,
+            return_transfer_fee: transfer_fee,
         });
         Ok(())
     }
@@ -425,6 +579,7 @@ pub struct FillOffer<'info> {
         has_one = quote_mint @ MarkDeskError::WrongQuoteMint
     )]
     pub offer: Account<'info, Offer>,
+    #[account(mut)]
     pub base_mint: InterfaceAccount<'info, Mint>,
     #[account(address = config.quote_mint @ MarkDeskError::WrongQuoteMint)]
     pub quote_mint: InterfaceAccount<'info, Mint>,
@@ -473,6 +628,7 @@ pub struct CancelOffer<'info> {
         has_one = base_mint @ MarkDeskError::WrongBaseMint
     )]
     pub offer: Account<'info, Offer>,
+    #[account(mut)]
     pub base_mint: InterfaceAccount<'info, Mint>,
     #[account(
         mut,
@@ -538,7 +694,9 @@ pub struct OfferCreated {
     pub offer: Pubkey,
     pub maker: Pubkey,
     pub base_mint: Pubkey,
-    pub base_amount: u64,
+    pub gross_deposit_amount: u64,
+    pub escrowed_amount: u64,
+    pub inbound_transfer_fee: u64,
     pub offset_bps: i16,
     pub expires_at: i64,
 }
@@ -548,7 +706,10 @@ pub struct OfferFilled {
     pub offer: Pubkey,
     pub maker: Pubkey,
     pub taker: Pubkey,
-    pub base_amount: u64,
+    pub gross_base_amount: u64,
+    pub buyer_net_base_amount: u64,
+    pub outbound_transfer_fee: u64,
+    pub scaled_quote_base_amount: u64,
     pub quote_amount: u64,
     pub mark_price_e6: u64,
     pub mark_sequence: u64,
@@ -558,7 +719,9 @@ pub struct OfferFilled {
 pub struct OfferCancelled {
     pub offer: Pubkey,
     pub maker: Pubkey,
-    pub returned_amount: u64,
+    pub gross_return_amount: u64,
+    pub maker_net_return_amount: u64,
+    pub return_transfer_fee: u64,
 }
 
 fn validate_offset(offset_bps: i16) -> Result<()> {
@@ -579,6 +742,137 @@ fn assert_mark_fresh(mark: &Mark, now: i64, max_age_seconds: u32) -> Result<()> 
         MarkDeskError::StaleMark
     );
     Ok(())
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct BaseTransferAmounts {
+    gross_amount: u64,
+    fee_amount: u64,
+    net_amount: u64,
+    has_fee_extension: bool,
+}
+
+fn inspect_base_transfer<'info>(
+    token_program: &Interface<'info, TokenInterface>,
+    mint: &InterfaceAccount<'info, Mint>,
+    epoch: u64,
+    gross_amount: u64,
+) -> Result<BaseTransferAmounts> {
+    require!(gross_amount > 0, MarkDeskError::InvalidAmount);
+
+    if token_program.key() != TOKEN_2022_PROGRAM_ID {
+        return Ok(BaseTransferAmounts {
+            gross_amount,
+            fee_amount: 0,
+            net_amount: gross_amount,
+            has_fee_extension: false,
+        });
+    }
+
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.try_borrow_data()?;
+    let mint_state = StateWithExtensions::<SplMint>::unpack(&mint_data)?;
+    let extension_types = mint_state.get_extension_types()?;
+
+    if transfer_hook::get_program_id(&mint_state).is_some() {
+        return err!(MarkDeskError::ActiveTransferHookUnsupported);
+    }
+
+    if extension_types
+        .contains(&anchor_spl::token_2022::spl_token_2022::extension::ExtensionType::Pausable)
+    {
+        let pausable = mint_state.get_extension::<PausableConfig>()?;
+        require!(!bool::from(pausable.paused), MarkDeskError::MintPaused);
+    }
+
+    if extension_types.contains(
+        &anchor_spl::token_2022::spl_token_2022::extension::ExtensionType::TransferFeeConfig,
+    ) {
+        let fee_config = mint_state.get_extension::<TransferFeeConfig>()?;
+        let fee_amount = fee_config
+            .calculate_epoch_fee(epoch, gross_amount)
+            .ok_or(MarkDeskError::ArithmeticOverflow)?;
+        let net_amount = gross_amount
+            .checked_sub(fee_amount)
+            .ok_or(MarkDeskError::ArithmeticOverflow)?;
+        Ok(BaseTransferAmounts {
+            gross_amount,
+            fee_amount,
+            net_amount,
+            has_fee_extension: true,
+        })
+    } else {
+        Ok(BaseTransferAmounts {
+            gross_amount,
+            fee_amount: 0,
+            net_amount: gross_amount,
+            has_fee_extension: false,
+        })
+    }
+}
+
+fn mint_has_transfer_fee_extension<'info>(
+    token_program: &Interface<'info, TokenInterface>,
+    mint: &InterfaceAccount<'info, Mint>,
+) -> Result<bool> {
+    if token_program.key() != TOKEN_2022_PROGRAM_ID {
+        return Ok(false);
+    }
+
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.try_borrow_data()?;
+    let mint_state = StateWithExtensions::<SplMint>::unpack(&mint_data)?;
+    Ok(mint_state.get_extension_types()?.contains(
+        &anchor_spl::token_2022::spl_token_2022::extension::ExtensionType::TransferFeeConfig,
+    ))
+}
+
+fn scaled_amount_for_quote<'info>(
+    token_program: &Interface<'info, TokenInterface>,
+    mint: &InterfaceAccount<'info, Mint>,
+    raw_amount: u64,
+    unix_timestamp: i64,
+) -> Result<u64> {
+    if token_program.key() != TOKEN_2022_PROGRAM_ID {
+        return Ok(raw_amount);
+    }
+
+    let mint_info = mint.to_account_info();
+    let mint_data = mint_info.try_borrow_data()?;
+    let mint_state = StateWithExtensions::<SplMint>::unpack(&mint_data)?;
+    let extension_types = mint_state.get_extension_types()?;
+    if !extension_types
+        .contains(&anchor_spl::token_2022::spl_token_2022::extension::ExtensionType::ScaledUiAmount)
+    {
+        return Ok(raw_amount);
+    }
+
+    let config = mint_state.get_extension::<ScaledUiAmountConfig>()?;
+    let effective_timestamp = i64::from(config.new_multiplier_effective_timestamp);
+    let multiplier = if unix_timestamp >= effective_timestamp {
+        f64::from(config.new_multiplier)
+    } else {
+        f64::from(config.multiplier)
+    };
+    apply_scaled_ui_multiplier(raw_amount, multiplier)
+}
+
+fn apply_scaled_ui_multiplier(raw_amount: u64, multiplier: f64) -> Result<u64> {
+    require!(
+        multiplier.is_finite() && multiplier > 0.0,
+        MarkDeskError::InvalidUiMultiplier
+    );
+    // Preserve all 64 bits on the overwhelmingly common identity path instead
+    // of round-tripping the raw amount through f64.
+    if multiplier == 1.0 {
+        return Ok(raw_amount);
+    }
+    let scaled = (raw_amount as f64) * multiplier;
+    require!(
+        scaled.is_finite() && scaled >= 0.0 && scaled <= u64::MAX as f64,
+        MarkDeskError::ScaledAmountOutOfRange
+    );
+    Ok(scaled.trunc() as u64)
 }
 
 pub fn calculate_quote_raw(
@@ -658,6 +952,69 @@ fn transfer_checked<'info>(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+fn execute_base_transfer<'info>(
+    token_program: &Interface<'info, TokenInterface>,
+    from: &InterfaceAccount<'info, TokenAccount>,
+    mint: &InterfaceAccount<'info, Mint>,
+    to: &InterfaceAccount<'info, TokenAccount>,
+    authority: &AccountInfo<'info>,
+    transfer: BaseTransferAmounts,
+    decimals: u8,
+    signer_seeds: Option<&[&[u8]]>,
+) -> Result<()> {
+    if transfer.has_fee_extension {
+        let accounts = TransferCheckedWithFee {
+            token_program_id: token_program.to_account_info(),
+            source: from.to_account_info(),
+            mint: mint.to_account_info(),
+            destination: to.to_account_info(),
+            authority: authority.clone(),
+        };
+        let context = CpiContext::new(token_program.key(), accounts);
+        match signer_seeds {
+            Some(seeds) => transfer_checked_with_fee(
+                context.with_signer(&[seeds]),
+                transfer.gross_amount,
+                decimals,
+                transfer.fee_amount,
+            ),
+            None => transfer_checked_with_fee(
+                context,
+                transfer.gross_amount,
+                decimals,
+                transfer.fee_amount,
+            ),
+        }
+    } else {
+        transfer_checked(
+            token_program,
+            from,
+            mint,
+            to,
+            authority,
+            transfer.gross_amount,
+            decimals,
+            signer_seeds,
+        )
+    }
+}
+
+fn harvest_vault_fees<'info>(
+    token_program: &Interface<'info, TokenInterface>,
+    mint: &InterfaceAccount<'info, Mint>,
+    vault: &InterfaceAccount<'info, TokenAccount>,
+) -> Result<()> {
+    let accounts = HarvestWithheldTokensToMint {
+        token_program_id: token_program.to_account_info(),
+        mint: mint.to_account_info(),
+    };
+    harvest_withheld_tokens_to_mint(
+        CpiContext::new(token_program.key(), accounts),
+        vec![vault.to_account_info()],
+    )
+}
+
 fn close_token_account<'info>(
     token_program: &Interface<'info, TokenInterface>,
     account: &InterfaceAccount<'info, TokenAccount>,
@@ -717,8 +1074,32 @@ pub enum MarkDeskError {
     ArithmeticOverflow,
     #[msg("The calculated quote does not fit in a token amount")]
     QuoteTooLarge,
-    #[msg("This token transfer behavior is not supported by v1")]
-    UnsupportedTransferBehavior,
+    #[msg("The destination balance changed by an unexpected amount")]
+    UnexpectedTransferDelta,
+    #[msg("The configured quote token must settle without transfer deductions")]
+    UnsupportedQuoteTransfer,
+    #[msg("The vault balance no longer matches the offer inventory")]
+    VaultBalanceMismatch,
+    #[msg("The active Token-2022 transfer hook is not supported")]
+    ActiveTransferHookUnsupported,
+    #[msg("The Token-2022 mint is currently paused")]
+    MintPaused,
+    #[msg("The transfer fee leaves no spendable base amount")]
+    NetAmountZero,
+    #[msg("The Token-2022 scaled-UI multiplier is invalid")]
+    InvalidUiMultiplier,
+    #[msg("The scaled-UI amount does not fit in a token amount")]
+    ScaledAmountOutOfRange,
+    #[msg("The escrow credit is below the maker's minimum")]
+    MinimumEscrowNotMet,
+    #[msg("The mark changed after the taker built the transaction")]
+    UnexpectedMarkSequence,
+    #[msg("The buyer's net base receipt is below the signed minimum")]
+    MinimumBuyerNetNotMet,
+    #[msg("The quote debit exceeds the taker's signed maximum")]
+    MaximumQuoteExceeded,
+    #[msg("The maker's net cancellation return is below the signed minimum")]
+    MinimumReturnNotMet,
 }
 
 #[cfg(test)]
@@ -747,5 +1128,100 @@ mod tests {
     fn quote_math_rejects_unsupported_decimals() {
         let error = calculate_quote_raw(1, 19, 6, 1_000_000, 0).unwrap_err();
         assert!(error.to_string().contains("precision"));
+    }
+
+    #[test]
+    fn prestocks_fee_path_prices_the_buyers_net_receipt() {
+        use anchor_spl::token_2022::spl_token_2022::extension::transfer_fee::TransferFee;
+
+        let fee = TransferFee {
+            epoch: 0_u64.into(),
+            maximum_fee: u64::MAX.into(),
+            transfer_fee_basis_points: 50_u16.into(),
+        };
+        let seller_gross = 1_000_000_000_u64;
+        let inbound_fee = fee.calculate_fee(seller_gross).unwrap();
+        let vault_amount = fee.calculate_post_fee_amount(seller_gross).unwrap();
+        let outbound_fee = fee.calculate_fee(vault_amount).unwrap();
+        let buyer_net = fee.calculate_post_fee_amount(vault_amount).unwrap();
+
+        assert_eq!(inbound_fee, 5_000_000);
+        assert_eq!(vault_amount, 995_000_000);
+        assert_eq!(outbound_fee, 4_975_000);
+        assert_eq!(buyer_net, 990_025_000);
+
+        let scaled_buyer_amount = apply_scaled_ui_multiplier(buyer_net, 5.0).unwrap();
+        let quote = calculate_quote_raw(scaled_buyer_amount, 9, 6, 100_000_000, 0).unwrap();
+        assert_eq!(scaled_buyer_amount, 4_950_125_000);
+        assert_eq!(quote, 495_012_500);
+    }
+
+    #[test]
+    fn openai_multiplier_matches_token_2022_truncation() {
+        assert_eq!(
+            apply_scaled_ui_multiplier(990_025_000, 1.486_134_7).unwrap(),
+            1_471_310_506
+        );
+    }
+
+    fn assert_mainnet_fixture(data: &[u8], expected_supply: u64, expected_new_multiplier: f64) {
+        let mint = StateWithExtensions::<SplMint>::unpack(data).unwrap();
+        assert_eq!(mint.base.decimals, 9);
+        assert_eq!(mint.base.supply, expected_supply);
+        assert!(transfer_hook::get_program_id(&mint).is_none());
+
+        let fee = mint.get_extension::<TransferFeeConfig>().unwrap();
+        assert_eq!(
+            u16::from(fee.get_epoch_fee(1_038).transfer_fee_basis_points),
+            50
+        );
+        assert_eq!(
+            fee.calculate_epoch_fee(1_038, 1_000_000_000),
+            Some(5_000_000)
+        );
+        assert_eq!(
+            u16::from(fee.get_epoch_fee(1_039).transfer_fee_basis_points),
+            100
+        );
+        assert_eq!(
+            fee.calculate_epoch_fee(1_039, 1_000_000_000),
+            Some(10_000_000)
+        );
+
+        let scaled = mint.get_extension::<ScaledUiAmountConfig>().unwrap();
+        assert_eq!(f64::from(scaled.new_multiplier), expected_new_multiplier);
+        let pausable = mint.get_extension::<PausableConfig>().unwrap();
+        assert!(!bool::from(pausable.paused));
+    }
+
+    #[test]
+    fn parses_captured_mainnet_extension_layouts() {
+        assert_mainnet_fixture(
+            include_bytes!("../../../fixtures/mints/anduril.mint.bin"),
+            11_805_861_417_523,
+            1.0,
+        );
+        assert_mainnet_fixture(
+            include_bytes!("../../../fixtures/mints/openai.mint.bin"),
+            1_901_892_429_587,
+            1.486_134_7,
+        );
+        assert_mainnet_fixture(
+            include_bytes!("../../../fixtures/mints/spacex.mint.bin"),
+            8_742_506_831_107,
+            5.0,
+        );
+    }
+
+    #[test]
+    fn identity_multiplier_preserves_all_u64_bits() {
+        assert_eq!(apply_scaled_ui_multiplier(u64::MAX, 1.0).unwrap(), u64::MAX);
+    }
+
+    #[test]
+    fn invalid_scaled_ui_multiplier_fails_closed() {
+        for multiplier in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            assert!(apply_scaled_ui_multiplier(1, multiplier).is_err());
+        }
     }
 }

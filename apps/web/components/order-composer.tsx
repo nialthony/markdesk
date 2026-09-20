@@ -1,6 +1,11 @@
 "use client";
 
-import { applyOffsetToPrice, type PreStockAsset } from "@markdesk/core";
+import {
+  MARKDESK_FLAGSHIP_MINT,
+  PRESTOCKS_MINTS,
+  applyOffsetToPrice,
+  type PreStockAsset,
+} from "@markdesk/core";
 import { useMemo, useState } from "react";
 import { ArrowUpRight, Clock, Shield } from "./icons";
 
@@ -20,6 +25,9 @@ export function OrderComposer({ asset }: { asset: PreStockAsset }) {
   const [amount, setAmount] = useState("0.25");
   const [offsetBps, setOffsetBps] = useState(-300);
   const [previewed, setPreviewed] = useState(false);
+  const isFlagship = asset.mint === MARKDESK_FLAGSHIP_MINT;
+  const isScaled = asset.mint === PRESTOCKS_MINTS.OPENAI || asset.mint === PRESTOCKS_MINTS.SPACEX;
+  const hasMigrationDeadline = asset.mint === PRESTOCKS_MINTS.SPACEX;
 
   const estimate = useMemo(() => {
     const parsed = Number(amount);
@@ -60,8 +68,28 @@ export function OrderComposer({ asset }: { asset: PreStockAsset }) {
         </div>
       </div>
 
+      <div
+        className="compatibilityNotice"
+        data-level={hasMigrationDeadline ? "critical" : "standard"}
+      >
+        <strong>
+          {hasMigrationDeadline
+            ? "LEGACY TOKEN DEADLINE"
+            : isFlagship
+              ? "FLAGSHIP COMPATIBILITY PATH"
+              : "TOKEN-2022 CONTROLS"}
+        </strong>
+        <span>
+          {hasMigrationDeadline
+            ? "PreStocks says this SpaceX token must be swapped before March 12, 2027 or it expires worthless."
+            : isScaled
+              ? "Quotes apply the live scaled-UI multiplier after both transfer-fee legs. Issuer controls still apply."
+              : "Settlement re-reads epoch fees, pause state, and issuer-controlled extensions on-chain."}
+        </span>
+      </div>
+
       <label className="fieldLabel" htmlFor="amount">
-        Amount
+        Buyer receives (target)
       </label>
       <div className="amountField">
         <input
@@ -118,8 +146,12 @@ export function OrderComposer({ asset }: { asset: PreStockAsset }) {
           <dd>{usd.format(estimate.unitPrice)}</dd>
         </div>
         <div>
-          <dt>Estimated settlement</dt>
+          <dt>Estimated buyer-net settlement</dt>
           <dd>{usd.format(estimate.total)} USDC</dd>
+        </div>
+        <div>
+          <dt>Token path</dt>
+          <dd>2 fee-aware transfers</dd>
         </div>
         <div>
           <dt>Expiry</dt>
@@ -137,8 +169,9 @@ export function OrderComposer({ asset }: { asset: PreStockAsset }) {
       </button>
 
       <p className="composerNotice">
-        <Shield /> No wallet transaction is enabled in this bootstrap. Exact settlement will use
-        mint decimals read on-chain, not this display estimate.
+        <Shield /> No wallet transaction is enabled yet. The transaction builder will re-read the
+        epoch fee, UI multiplier, pause state, and hook state, then gross up both fee legs and
+        simulate before signing.
       </p>
 
       {previewed ? (
@@ -148,12 +181,12 @@ export function OrderComposer({ asset }: { asset: PreStockAsset }) {
             <span className="statusDot">UNSIGNED</span>
           </div>
           <p>
-            Sell{" "}
+            Target a buyer-net receipt of{" "}
             <strong>
               {amount} {asset.symbol}
             </strong>{" "}
-            at the latest fresh mark <strong>{signedPercent(offsetBps)}</strong>, expiring 24 hours
-            after creation.
+            at the latest fresh mark <strong>{signedPercent(offsetBps)}</strong>. The maker deposit
+            is grossed up for both Token-2022 fee legs; the offer expires after 24 hours.
           </p>
           <div className="briefRule">
             <Clock /> Fill rejects marks older than the configured maximum age.

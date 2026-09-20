@@ -1,6 +1,6 @@
 "use client";
 
-import type { MarketCatalog, PreStockAsset } from "@markdesk/core";
+import { MARKDESK_FLAGSHIP_MINT, type MarketCatalog, type PreStockAsset } from "@markdesk/core";
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "./icons";
 import { OrderComposer } from "./order-composer";
@@ -30,7 +30,8 @@ function shortMint(mint: string): string {
 }
 
 export function MarketBoard({ catalog }: { catalog: MarketCatalog }) {
-  const initial = catalog.assets.find((asset) => asset.symbol === "SPACEX") ?? catalog.assets[0];
+  const initial =
+    catalog.assets.find((asset) => asset.mint === MARKDESK_FLAGSHIP_MINT) ?? catalog.assets[0];
   const [selectedSymbol, setSelectedSymbol] = useState(initial?.symbol ?? "");
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");

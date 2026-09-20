@@ -2,7 +2,7 @@
 
 **Mark-relative OTC orders for tokenized private markets on Solana.**
 
-MarkDesk lets a holder create an offer such as **“sell SpaceX at the latest PreStocks mark minus 3%”** instead of posting a fixed price that becomes stale. A taker fills with USDC; the Solana program checks a fresh published mark and settles both legs atomically.
+MarkDesk lets a holder create an offer such as **“sell Anduril at the latest PreStocks mark minus 3%”** instead of posting a fixed price that becomes stale. A taker fills with USDC; the Solana program checks a fresh published mark and settles both legs atomically.
 
 > Built for the Solana Stocklana hackathon. This repository is an early technical prototype, not an audited production protocol or an offer of financial products.
 
@@ -20,11 +20,12 @@ Private-market tokens can trade far from their reference mark, while thin liquid
 | Component                                                  | Status                                                       |
 | ---------------------------------------------------------- | ------------------------------------------------------------ |
 | Live PreStocks catalog and fallback snapshot               | Implemented                                                  |
-| Deterministic mark-relative quote math                     | Implemented and tested                                       |
+| Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                  |
+| Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                       |
 | Publisher normalization and canonical payloads             | Implemented and tested                                       |
 | Anchor config, mark, create, fill, and cancel instructions | Initial implementation                                       |
-| Token custody                                              | Initial SPL / Token-2022 interface path                      |
-| Transfer-hook and net-of-transfer-fee adapters             | Not implemented yet                                          |
+| Transfer-fee escrow and withheld-fee harvesting            | Implemented; validator integration test still required       |
+| Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported |
 | Wallet transaction UI                                      | Not implemented yet; web app is a read-only protocol preview |
 | Devnet / mainnet deployment                                | Not deployed                                                 |
 | Security audit                                             | Not audited                                                  |
@@ -63,6 +64,14 @@ npm run publisher -- --once
 
 The unsigned normalized snapshot is written to `var/marks.json`. Key management and on-chain publication are intentionally not faked in this bootstrap.
 
+Re-run the mainnet Token-2022 compatibility scan:
+
+```bash
+npm run inspect:mints -- --output research/prestocks-mint-scan.latest.json
+```
+
+See the [dated compatibility report](research/PRESTOCKS_MINT_COMPATIBILITY_2026-09-20.md). Results are point-in-time because issuer authorities can change fee, multiplier, pause, and hook settings.
+
 ### Anchor program
 
 Install Rust, Solana CLI, and Anchor 1.2+, then:
@@ -80,6 +89,10 @@ The declared program id is a source placeholder until the first deployment. Run 
 - Only the configured publisher may update marks.
 - Mark sequences must increase and timestamps must be fresh at fill time.
 - Offer price calculations use checked `u128` arithmetic and round quote amounts up.
+- Base-token quotes use the buyer's net receipt after the current epoch fee and active scaled-UI multiplier.
+- Signed minimum-receive, maximum-quote, and expected-mark-sequence bounds prevent execution races.
+- Transfer-fee vaults harvest withheld tokens to the mint before closure.
+- Active transfer hooks are rejected until their extra-account metas can be validated and forwarded.
 - Makers alone can cancel their offers.
 - Each offer PDA is unique to `(maker, offer_id)`.
 - The program never treats the upstream API as cryptographically trustless.

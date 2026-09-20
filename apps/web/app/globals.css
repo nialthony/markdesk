@@ -577,6 +577,30 @@ button {
 .selectedMark strong {
   font: 650 12px/1 var(--mono);
 }
+.compatibilityNotice {
+  display: grid;
+  gap: 6px;
+  margin: -8px 0 20px;
+  padding: 11px 12px;
+  border: 1px solid color-mix(in srgb, var(--acid) 45%, var(--line));
+  background: var(--acid-soft);
+}
+.compatibilityNotice strong {
+  color: var(--acid);
+  font: 700 7px/1 var(--mono);
+  letter-spacing: 0.08em;
+}
+.compatibilityNotice span {
+  color: var(--muted);
+  font: 500 8px/1.5 var(--mono);
+}
+.compatibilityNotice[data-level="critical"] {
+  border-color: color-mix(in srgb, var(--orange) 65%, var(--line));
+  background: color-mix(in srgb, var(--orange) 8%, transparent);
+}
+.compatibilityNotice[data-level="critical"] strong {
+  color: var(--orange);
+}
 .fieldLabel {
   display: block;
   margin-bottom: 8px;
@@ -836,7 +860,8 @@ button {
 .statusRow strong[data-status="TESTED"] {
   color: var(--acid);
 }
-.statusRow strong[data-status="INITIAL"] {
+.statusRow strong[data-status="INITIAL"],
+.statusRow strong[data-status="CODED"] {
   color: var(--blue);
 }
 .statusRow strong[data-status="NEXT"],

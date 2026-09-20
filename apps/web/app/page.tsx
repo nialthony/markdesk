@@ -174,10 +174,10 @@ export default async function Home() {
             <span>BOOTSTRAP / 0.1</span>
           </div>
           {[
-            ["Live catalog + fallback", "DONE"],
-            ["Integer quote engine", "TESTED"],
-            ["Publisher normalizer", "TESTED"],
-            ["Anchor instruction core", "INITIAL"],
+            ["Eight-mint extension audit", "DONE"],
+            ["Fee + scaled-UI quote engine", "TESTED"],
+            ["Withheld-fee vault closure", "CODED"],
+            ["Anchor settlement core", "INITIAL"],
             ["Wallet transaction UI", "NEXT"],
             ["Devnet deployment", "PENDING"],
           ].map(([label, status]) => (

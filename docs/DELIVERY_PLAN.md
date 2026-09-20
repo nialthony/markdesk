@@ -13,9 +13,11 @@ MarkDesk is a Solana escrow where PreStocks holders post offers relative to the 
 - [x] Shared integer quote implementation and unit tests
 - [x] Publisher normalization pipeline
 - [x] Initial Anchor account model and instruction implementation
-- [ ] Compile and local-validator integration tests
-- [ ] Inspect one actual PreStocks mint's Token-2022 extensions
-- [ ] Enable one supported mint end-to-end
+- [x] Host compile, Rust tests, and clippy
+- [x] Inspect all eight live PreStocks Token-2022 mints
+- [x] Implement epoch-fee, buyer-net, scaled-UI, and withheld-fee logic
+- [ ] Local-validator integration tests with extension-enabled fixtures
+- [ ] Enable ANDURIL end-to-end
 - [ ] Wallet create / cancel / fill flows with RPC confirmation
 - [ ] Devnet deployment and Explorer links
 - [ ] 90-second demo video
@@ -23,17 +25,20 @@ MarkDesk is a Solana escrow where PreStocks holders post offers relative to the 
 
 ## Ruthless scope
 
-Version one is sell-side, full-fill, one base mint, one quote mint, and one publisher. No partial fills, order matching, AI, baskets, lending, mobile app, or extra pre-IPO issuer.
+Version one is sell-side, full-fill, one supported base mint at launch, one quote mint, and one publisher. No partial fills, order matching, AI, baskets, lending, mobile app, or extra pre-IPO issuer.
+
+**Flagship:** ANDURIL. It exercises real transfer-fee and issuer-control behavior without a currently active scaled multiplier or product migration banner. OPENAI and SPACEX stay regression vectors for scaled-UI math; SPACEX is not a flagship because its legacy token has a March 12, 2027 swap deadline.
 
 ## Demo script
 
-1. Show token price versus official mark and source timestamp.
-2. Maker creates “sell at mark −3%” with a small test balance.
-3. Show the Offer PDA and escrow balance on Explorer.
-4. Taker fills after a fresh mark update.
-5. Re-read both wallets and show the settlement event.
-6. Attempt a stale-mark fill and show the program rejection.
-7. State the publisher trust boundary and Token-2022 support honestly.
+1. Show ANDURIL token price versus official mark and source timestamp.
+2. Show the dated eight-mint extension audit and explain the two fee legs.
+3. Maker requests a buyer-net amount at “mark −3%”; the client shows the gross deposit.
+4. Show the confirmed Offer PDA, net vault inventory, and inbound withheld fee.
+5. Taker fills after a fresh mark update.
+6. Re-read both wallets and show buyer net, maker USDC, fee harvest, vault closure, and settlement event.
+7. Attempt a stale-mark fill and show the program rejection.
+8. State publisher trust and issuer pause/freeze/permanent-delegate powers honestly.
 
 ## Internal cutoff
 

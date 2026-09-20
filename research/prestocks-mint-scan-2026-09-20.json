@@ -1,0 +1,614 @@
+{
+  "schema": "markdesk.prestocks-mint-scan.v1",
+  "generatedAt": "2026-09-19T17:48:38.904Z",
+  "source": "https://prestocks.com/api/prestocks",
+  "rpc": "https://api.mainnet-beta.solana.com",
+  "cluster": {
+    "epoch": 1038,
+    "slot": 448479607,
+    "unixTimestamp": 1789840116
+  },
+  "warning": "Point-in-time on-chain inspection. Authorities and extension settings can change.",
+  "assets": [
+    {
+      "symbol": "ANDURIL",
+      "name": "Anduril PreStocks",
+      "mint": "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 905,
+      "decimals": 9,
+      "rawSupply": "11805861417523",
+      "rawSupplyTokens": 11805.861417523,
+      "scaledUiSupply": 11805.861417523,
+      "apiSupply": 11805.861417523,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "11484184",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PresTj4Yc2bAR197Er7wz4UUKSfqt6FryBEdAriBoQB",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "ANTHROPIC",
+      "name": "Anthropic PreStocks",
+      "mint": "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 911,
+      "decimals": 9,
+      "rawSupply": "7381893968911",
+      "rawSupplyTokens": 7381.893968911,
+      "scaledUiSupply": 7381.893968911,
+      "apiSupply": 7381.893968911,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "303106848",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "Pren1FvFX6J3E4kXhJuCiAD5aDmGEb7qJRncwA8Lkhw",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "FIGUREAI",
+      "name": "Figure AI PreStocks",
+      "mint": "PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 909,
+      "decimals": 9,
+      "rawSupply": "3012913331574",
+      "rawSupplyTokens": 3012.913331574,
+      "scaledUiSupply": 3012.913331574,
+      "apiSupply": 3012.913331574,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "11543431",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PreZad18qfPtbxNpMtMuAuX2zVpvkEU8DnJx56faCWd",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "KALSHI",
+      "name": "Kalshi PreStocks",
+      "mint": "PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 902,
+      "decimals": 9,
+      "rawSupply": "904897462014",
+      "rawSupplyTokens": 904.897462014,
+      "scaledUiSupply": 904.897462014,
+      "apiSupply": 904.897462014,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "4992436",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PreLWGkkeqG1s4HEfFZSy9moCrJ7btsHuUtfcCeoRua",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "NEURALINK",
+      "name": "Neuralink PreStocks",
+      "mint": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 911,
+      "decimals": 9,
+      "rawSupply": "2595336219579",
+      "rawSupplyTokens": 2595.336219579,
+      "scaledUiSupply": 2595.336219579,
+      "apiSupply": 2595.336219579,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "470433681",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PrekqLJvJ3qVdXmBGDiexvwUTF4rLFDa6HWS4HJbw9S",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "OPENAI",
+      "name": "OpenAI PreStocks",
+      "mint": "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 902,
+      "decimals": 9,
+      "rawSupply": "1901892429587",
+      "rawSupplyTokens": 1901.892429587,
+      "scaledUiSupply": 2826.4683352765474,
+      "apiSupply": 2826.4683352765474,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "314612159",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1.4861347,
+        "newMultiplierEffectiveTimestamp": "1784305800",
+        "activeMultiplier": 1.4861347
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PreweJYECqtQwBtpxHL171nL2K6umo692gTm7Q3rpgF",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "POLYMARKET",
+      "name": "Polymarket PreStocks",
+      "mint": "Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 914,
+      "decimals": 9,
+      "rawSupply": "4817136182732",
+      "rawSupplyTokens": 4817.136182732,
+      "scaledUiSupply": 4817.136182732,
+      "apiSupply": 4817.136182732,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "125726367",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 1,
+        "newMultiplierEffectiveTimestamp": "0",
+        "activeMultiplier": 1
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "Pre8AREmFPtoJFT8mQSXQLh56cwJmM7CFDRuoGBZiUP",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    },
+    {
+      "symbol": "SPACEX",
+      "name": "SpaceX PreStocks",
+      "mint": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+      "accountOwner": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "accountDataLength": 902,
+      "decimals": 9,
+      "rawSupply": "8742506831107",
+      "rawSupplyTokens": 8742.506831107,
+      "scaledUiSupply": 43712.534155535,
+      "apiSupply": 43712.534155535,
+      "authorities": {
+        "mint": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "freeze": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "permanentDelegate": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "pause": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc"
+      },
+      "extensions": [
+        "PermanentDelegate",
+        "DefaultAccountState",
+        "TransferFeeConfig",
+        "ConfidentialTransferMint",
+        "ConfidentialTransferFeeConfig",
+        "TransferHook",
+        "ScaledUiAmountConfig",
+        "MetadataPointer",
+        "PausableConfig",
+        "TokenMetadata"
+      ],
+      "transferFee": {
+        "configAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withdrawWithheldAuthority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "withheldOnMintRaw": "916",
+        "current": {
+          "epoch": "1032",
+          "basisPoints": 50,
+          "maximumFeeRaw": "18446744073709551615"
+        },
+        "scheduled": {
+          "epoch": "1039",
+          "basisPoints": 100,
+          "maximumFeeRaw": "18446744073709551615"
+        }
+      },
+      "transferHook": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "programId": "11111111111111111111111111111111",
+        "active": false
+      },
+      "scaledUiAmount": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "multiplier": 1,
+        "newMultiplier": 5,
+        "newMultiplierEffectiveTimestamp": "1781065800",
+        "activeMultiplier": 5
+      },
+      "pausable": {
+        "authority": "WV9PJN7XTmTLVwbutCLFxp8TyePee6Xq5mRq6Fti5Wc",
+        "paused": false
+      },
+      "defaultAccountState": {
+        "value": 1,
+        "label": "Initialized"
+      },
+      "mintCloseAuthority": null,
+      "metadataAddress": "PreANxuXjsy2pvisWWMNB6YaJNzr7681wJJr2rHsfTh",
+      "protocolRequirements": {
+        "transferFeeGrossUp": true,
+        "harvestVaultWithheldFees": true,
+        "scaledUiQuoteMath": true,
+        "transferHookExtraAccounts": false,
+        "issuerCanMoveVaultFunds": true,
+        "issuerCanPauseTransfers": true
+      }
+    }
+  ]
+}

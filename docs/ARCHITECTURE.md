@@ -44,7 +44,9 @@ Instructions:
 4. `fill_offer`
 5. `cancel_offer`
 
-The initial transfer path uses Anchor's token interface to support classic SPL and basic Token-2022 accounts. Assets requiring transfer-hook remaining accounts or net-of-transfer-fee guarantees stay disabled until adapters are implemented and tested.
+The base-token path is Token-2022 aware. It reads the active epoch fee, uses `transfer_checked_with_fee`, records the spendable vault credit, prices the buyer's net receipt, harvests withheld vault fees to the mint, and only then closes the vault. A non-zero transfer-hook program is rejected until ExtraAccountMetaList resolution and remaining-account forwarding ship. Quote-token settlement remains fail-closed and requires the maker's balance to increase by the exact calculated amount.
+
+Signed execution bounds prevent configuration races: create includes a minimum escrow credit; fill binds the expected mark sequence, minimum buyer-net base amount, and maximum quote debit; cancel includes a minimum maker-net return.
 
 ### `apps/web`
 
@@ -52,9 +54,15 @@ The first web milestone is intentionally read-only. It renders live/fallback mar
 
 ## Price representation
 
-A mark is stored as `price_e6`, integer USD micro-units per whole base token. Offsets are signed basis points.
+A mark is stored as `price_e6`, integer USD micro-units per displayed base token. Offsets are signed basis points.
 
-For a base raw amount `B`, base decimals `Db`, quote decimals `Dq`, mark `P`, and offset `O`:
+Let `G` be the vault's gross outbound amount. The program selects the current epoch's transfer fee from the mint and computes buyer net `N = G - fee(G)`. It then applies Token-2022's active scaled-UI multiplier with the same truncation convention:
+
+```text
+B = trunc(N × active_ui_multiplier)
+```
+
+For scaled buyer amount `B`, base decimals `Db`, quote decimals `Dq`, mark `P`, and offset `O`:
 
 ```text
 quote_raw = ceil(
@@ -64,7 +72,23 @@ quote_raw = ceil(
 )
 ```
 
-The program uses checked `u128` intermediates and rounds up so a maker is never underpaid by integer truncation.
+The program uses checked `u128` quote intermediates and rounds up so a maker is never underpaid by integer truncation. Transfer fees are ceiling-rounded according to Token-2022. The TypeScript client additionally provides inverse-fee math to gross up both maker→vault and vault→buyer legs for a requested buyer-net amount.
+
+## Token-2022 close path
+
+```text
+maker gross deposit
+  └─ fee #1 withheld in vault; net credit becomes offer inventory
+       └─ full fill: inventory debited from vault
+            ├─ fee #2 withheld in buyer account
+            └─ buyer net is the priced economic quantity
+                 └─ harvest vault withheld fee → mint
+                      └─ close empty vault → maker
+```
+
+The mint is writable on fill/cancel because harvesting increments the mint's withheld-fee accumulator. Harvesting is permissionless; withdrawing those fees remains controlled by the mint's configured withdraw authority.
+
+Before quote payment, fill verifies that vault inventory still equals the offer record. This catches out-of-band movement by a permanent delegate. It cannot prevent issuer intervention; it prevents a taker from paying against already-missing inventory.
 
 ## Trust boundary
 
