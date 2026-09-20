@@ -48,6 +48,10 @@ The base-token path is Token-2022 aware. It reads the active epoch fee, uses `tr
 
 Signed execution bounds prevent configuration races: create includes a minimum escrow credit; fill binds the expected mark sequence, minimum buyer-net base amount, and maximum quote debit; cancel includes a minimum maker-net return.
 
+### `tests/validator`
+
+A separate Rust workspace builds MarkDesk as SBF, runs it through `solana-program-test` 3.0.7, and uses that runtime's SBF Token-2022 and associated-token-account fixtures. Its synthetic base mint carries transfer-fee, default-state, permanent-delegate, inactive-hook, pausable, and scaled-UI extensions. The suite executes fee-bearing create → fill and create → cancel, proves atomic failures for every signed settlement bound, inspects withheld amounts, and verifies vault/offer closure. CI also enforces measured compute ceilings; see the [dated SBF report](../research/TOKEN_2022_SBF_VALIDATION_2026-09-20.md).
+
 ### `apps/web`
 
 The first web milestone is intentionally read-only. It renders live/fallback market data and deterministic offer previews. Wallet buttons and transaction states will only ship alongside RPC confirmation and account re-reads.

@@ -16,7 +16,8 @@ MarkDesk is a Solana escrow where PreStocks holders post offers relative to the 
 - [x] Host compile, Rust tests, and clippy
 - [x] Inspect all eight live PreStocks Token-2022 mints
 - [x] Implement epoch-fee, buyer-net, scaled-UI, and withheld-fee logic
-- [ ] Local-validator integration tests with extension-enabled fixtures
+- [x] SBF validator-runtime integration tests with extension-enabled fixtures
+- [x] Measure create / fill / cancel SBF compute and enforce CI ceilings
 - [ ] Enable ANDURIL end-to-end
 - [ ] Wallet create / cancel / fill flows with RPC confirmation
 - [ ] Devnet deployment and Explorer links

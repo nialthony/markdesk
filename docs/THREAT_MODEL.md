@@ -31,11 +31,11 @@ The dated evidence and exact addresses are in [`../research/PRESTOCKS_MINT_COMPA
 | Fake mint                         | Mark PDA keyed by mint; configured quote mint                                                   | Explicit PreStocks asset registry                              |
 | Unauthorized cancellation         | Maker signer + PDA constraints                                                                  | Adversarial validator tests                                    |
 | Vault authority theft             | Offer PDA authority and deterministic seeds                                                     | Audit and formal account-constraint review                     |
-| Transfer-fee underdelivery        | Read active epoch fee; expected-fee CPI; verify exact destination delta; quote buyer net        | Local-validator tests against extension-enabled fixtures       |
-| Withheld fee blocks close         | Permissionless harvest to mint before close                                                     | Validator regression for fill and cancel                       |
+| Transfer-fee underdelivery        | Read active epoch fee; expected-fee CPI; verify exact destination delta; quote buyer net        | Devnet run against a fresh ANDURIL re-read                     |
+| Withheld fee blocks close         | Permissionless harvest to mint before close; SBF fill/cancel regressions                        | Devnet confirmation and post-transaction account checks        |
 | Fee schedule changes while listed | Re-read fee; signed minimum escrow, minimum buyer net, maximum quote, and minimum cancel return | Wallet must derive bounds conservatively and simulate          |
 | Mark changes before landing       | Fill binds the exact sequence and maximum quote signed by the taker                             | UX for rebuilding expired transactions                         |
-| Scaled-UI mispricing              | Apply active multiplier to buyer-net raw amount at fill; signed buyer-net/quote bounds          | SBF compute profiling and cross-language property vectors      |
+| Scaled-UI mispricing              | Apply active multiplier to buyer-net raw amount at fill; signed buyer-net/quote bounds          | Add a non-identity multiplier to the SBF settlement matrix     |
 | Active transfer hook              | Reject any non-zero hook program on-chain                                                       | Validate and forward ExtraAccountMetaList accounts             |
 | Permanent delegate drains vault   | Verify vault balance equals offer inventory before collecting quote                             | Cannot remove issuer authority; monitoring and UI warning      |
 | Issuer pauses/freezes             | Detect paused state before transfer and surface issuer control                                  | Cancellation can still be blocked by issuer; emergency policy  |
@@ -57,5 +57,7 @@ No mainnet deployment until all are true:
 - Program id and verified source are published.
 - Upgrade authority and publisher key policy are documented.
 - Independent review is complete.
+
+The dated [Token-2022 SBF report](../research/TOKEN_2022_SBF_VALIDATION_2026-09-20.md) now satisfies the fee-bearing create/fill/cancel, vault-harvest, closure, and compute-profile portions of these gates. The broader stale/replay/account-substitution matrix and devnet evidence remain open.
 
 Even after these gates, start with trivial value and explicit caps.

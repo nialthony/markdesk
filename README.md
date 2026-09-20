@@ -23,8 +23,8 @@ Private-market tokens can trade far from their reference mark, while thin liquid
 | Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                  |
 | Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                       |
 | Publisher normalization and canonical payloads             | Implemented and tested                                       |
-| Anchor config, mark, create, fill, and cancel instructions | Initial implementation                                       |
-| Transfer-fee escrow and withheld-fee harvesting            | Implemented; validator integration test still required       |
+| Anchor config, mark, create, fill, and cancel instructions | Implemented; create/fill/cancel paths SBF-tested             |
+| Transfer-fee escrow and withheld-fee harvesting            | Implemented and validator-runtime tested                     |
 | Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported |
 | Wallet transaction UI                                      | Not implemented yet; web app is a read-only protocol preview |
 | Devnet / mainnet deployment                                | Not deployed                                                 |
@@ -39,6 +39,7 @@ apps/web/               Next.js market board and offer preview
 packages/core/          Shared types, PreStocks normalization, and quote math
 services/publisher/     Mark ingestion and canonical snapshot writer
 programs/markdesk/      Anchor program
+tests/validator/         SBF ProgramTest settlement suite
 fixtures/               Labeled fallback data
 scripts/                Validation and developer utilities
 docs/                   Architecture, threat model, and delivery plan
@@ -74,12 +75,20 @@ See the [dated compatibility report](research/PRESTOCKS_MINT_COMPATIBILITY_2026-
 
 ### Anchor program
 
-Install Rust, Solana CLI, and Anchor 1.2+, then:
+Install stable Rust and Agave CLI 3.0.7, then run the host suite and the pinned SBF validator suite:
 
 ```bash
 cargo test -p markdesk
-anchor build
+cargo build-sbf \
+  --manifest-path programs/markdesk/Cargo.toml \
+  --tools-version v1.54 \
+  --force-tools-install \
+  --locked
+CARGO_TARGET_DIR="$PWD/target" \
+  cargo test --manifest-path tests/validator/Cargo.toml --locked
 ```
+
+The deterministic SBF run measures 52,607 CU for create, 44,368 CU for fill, and 33,334 CU for cancel on the extension-heavy fixture. See the [dated validation report](research/TOKEN_2022_SBF_VALIDATION_2026-09-20.md).
 
 The declared program id is a source placeholder until the first deployment. Run `anchor keys sync` before deploying and commit the resulting program-id change, never a deployer keypair.
 

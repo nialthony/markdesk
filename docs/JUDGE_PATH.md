@@ -12,6 +12,7 @@ This file will become the one-sitting evaluation path for the Stocklana submissi
 6. Run `npm run inspect:mints -- --output research/prestocks-mint-scan.latest.json` and compare the result with the dated report.
 7. Run `npm run publisher -- --once` and inspect `var/marks.json`; it is explicitly unsigned.
 8. Run `cargo test -p markdesk`. The regression vectors cover two 50-bps fee legs, SpaceX's 5× multiplier, OpenAI's 1.4861347× multiplier, checked quote rounding, and fail-closed multiplier validation.
+9. With Agave CLI 3.0.7 installed, follow the pinned SBF build and validator-test commands in the README. The extension-heavy fixture proves signed-bound rollback, both transfer-fee legs, exact quote settlement, withheld-fee harvesting, vault/Offer closure, and compute ceilings.
 
 ## Final submission path (not complete)
 

@@ -5,6 +5,9 @@ description = "Mark-relative OTC settlement for PreStocks on Solana"
 edition = "2021"
 license = "MIT"
 
+[package.metadata.solana]
+tools-version = "v1.54"
+
 [lib]
 crate-type = ["cdylib", "lib"]
 name = "markdesk"
