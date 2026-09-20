@@ -7,10 +7,13 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'Web behavior is covered by core tests until wallet flows land.'"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@markdesk/core": "0.1.0",
+    "@solana/spl-token": "0.4.15",
+    "@solana/web3.js": "1.99.0",
+    "@wallet-standard/app": "1.1.1",
     "next": "16.3.5",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -19,6 +22,7 @@
     "@types/node": "^20.17.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "tsx": "4.23.13",
     "typescript": "7.0.2"
   }
 }

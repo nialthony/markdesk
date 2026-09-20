@@ -17,26 +17,29 @@ Private-market tokens can trade far from their reference mark, while thin liquid
 
 ## Current state — honest by design
 
-| Component                                                  | Status                                                       |
-| ---------------------------------------------------------- | ------------------------------------------------------------ |
-| Live PreStocks catalog and fallback snapshot               | Implemented                                                  |
-| Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                  |
-| Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                       |
-| Publisher normalization and canonical payloads             | Implemented and tested                                       |
-| Anchor config, mark, create, fill, and cancel instructions | Implemented; create/fill/cancel paths SBF-tested             |
-| Transfer-fee escrow and withheld-fee harvesting            | Implemented and validator-runtime tested                     |
-| Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported |
-| Wallet transaction UI                                      | Not implemented yet; web app is a read-only protocol preview |
-| Devnet / mainnet deployment                                | Not deployed                                                 |
-| Security audit                                             | Not audited                                                  |
+| Component                                                  | Status                                                        |
+| ---------------------------------------------------------- | ------------------------------------------------------------- |
+| Live PreStocks catalog and fallback snapshot               | Implemented                                                   |
+| Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                   |
+| Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                        |
+| Publisher normalization and canonical payloads             | Implemented and tested                                        |
+| Anchor config, mark, create, fill, and cancel instructions | Implemented; create/fill/cancel paths SBF-tested              |
+| Transfer-fee escrow and withheld-fee harvesting            | Implemented and validator-runtime tested                      |
+| Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported  |
+| Wallet transaction console                                 | Client flows implemented and unit-tested; gated on deployment |
+| Devnet / mainnet deployment                                | Not deployed                                                  |
+| Security audit                                             | Not audited                                                   |
 
-No screen in the app claims a transaction occurred unless it came from confirmed RPC state.
+No screen in the app claims a transaction occurred unless it came from confirmed RPC state. The
+console simulates before signing, shows the signed bounds explicitly, confirms blockheight-aware,
+and renders success only after re-read balances, vault/Offer closure, and the settlement event all
+match. The UI keeps its read-only protocol preview label until the devnet two-wallet run passes.
 
 ## Repository layout
 
 ```text
-apps/web/               Next.js market board and offer preview
-packages/core/          Shared types, PreStocks normalization, and quote math
+apps/web/               Next.js market board and wallet transaction console
+packages/core/          Shared types, PreStocks normalization, quote math, and protocol codec
 services/publisher/     Mark ingestion and canonical snapshot writer
 programs/markdesk/      Anchor program
 tests/validator/         SBF ProgramTest settlement suite
@@ -56,6 +59,23 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The web server attempts to load `https://prestocks.com/api/prestocks`; if upstream is unavailable it uses a clearly labeled repository snapshot.
+
+### Wallet transaction console
+
+The execution console (Sell / Fill / Cancel tabs) is cluster-aware and environment-driven:
+
+```bash
+NEXT_PUBLIC_SOLANA_CLUSTER=devnet          # devnet | localnet | mainnet-beta
+NEXT_PUBLIC_SOLANA_RPC_URL=https://api.devnet.solana.com
+NEXT_PUBLIC_MARKDESK_PROGRAM_ID=<program id after anchor keys sync>
+```
+
+It connects through the Solana Wallet Standard (Phantom, Solflare, Backpack), re-reads the mark,
+fee epoch, scaled-UI multiplier, and issuer controls before anything is signed, simulates the full
+transaction, displays the signed minimum/maximum bounds, confirms blockheight-aware, and only then
+re-reads balances, vault/Offer closure, and the Anchor settlement event. Until the program is
+deployed on the target cluster the console lists its honest blockers; the app keeps its read-only
+protocol preview label until the devnet two-wallet run is verified.
 
 Run the mark publisher once:
 

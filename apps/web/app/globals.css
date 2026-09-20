@@ -1047,3 +1047,493 @@ button {
     text-align: center;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Wallet dock (nav)
+--------------------------------------------------------------------------- */
+.navRight {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.walletDock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.clusterPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  padding: 8px 10px;
+  color: var(--muted);
+  font: 700 7px/1 var(--mono);
+  letter-spacing: 0.08em;
+}
+.clusterPill span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.clusterPill[data-cluster="localnet"] span {
+  background: var(--orange);
+}
+.clusterPill[data-cluster="mainnet-beta"] span {
+  background: var(--red);
+}
+.walletMenuAnchor {
+  position: relative;
+}
+.walletConnectButton {
+  border: 1px solid var(--acid);
+  background: var(--acid);
+  color: var(--ink);
+  padding: 10px 14px;
+  font: 750 8px/1 var(--mono);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.walletConnectButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.walletMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 30;
+  min-width: 250px;
+  background: var(--panel);
+  border: 1px solid var(--line-bright);
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+.walletMenu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 10px;
+  font: 600 11px/1 var(--mono);
+  cursor: pointer;
+  text-align: left;
+}
+.walletMenu button:hover {
+  border-color: var(--acid);
+  background: var(--acid-soft);
+}
+.walletMenu button small {
+  margin-left: auto;
+  color: var(--muted-2);
+  font: 650 7px/1 var(--mono);
+}
+.walletMenuEmpty,
+.walletMenuNote {
+  margin: 0;
+  padding: 8px 10px;
+  color: var(--muted);
+  font: 500 9px/1.5 var(--mono);
+}
+.walletMenuNote {
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+}
+.walletIdentity {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid var(--line-bright);
+  padding: 7px 9px 7px 12px;
+}
+.walletIdentity strong {
+  font: 650 9px/1 var(--mono);
+}
+.walletIdentity button {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted-2);
+  padding: 6px 8px;
+  font: 700 7px/1 var(--mono);
+  cursor: pointer;
+}
+.walletIdentity button:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+.walletDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--acid);
+  box-shadow: 0 0 8px var(--acid);
+}
+.walletError {
+  color: var(--red);
+  font: 600 8px/1.3 var(--mono);
+  max-width: 180px;
+}
+
+/* ---------------------------------------------------------------------------
+   Console tabs & flow panels
+--------------------------------------------------------------------------- */
+.consoleTabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin: 18px 0 0;
+  padding: 3px;
+  border: 1px solid var(--line);
+}
+.consoleTabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted-2);
+  padding: 10px 4px;
+  font: 700 8px/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.consoleTabs button.active {
+  color: var(--ink);
+  background: var(--acid);
+}
+.consoleTabHint {
+  margin: 9px 0 4px;
+  color: var(--muted-2);
+  font: 500 8px/1.5 var(--mono);
+}
+.flowPanel {
+  display: grid;
+  gap: 0;
+}
+.readToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0 10px;
+}
+.readToolbarLabel {
+  color: var(--muted-2);
+  font: 700 7px/1 var(--mono);
+  letter-spacing: 0.1em;
+}
+.readToolbar button {
+  border: 1px solid var(--line-bright);
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 10px;
+  font: 700 7px/1 var(--mono);
+  cursor: pointer;
+}
+.readToolbar button:hover:not(:disabled) {
+  color: var(--acid);
+  border-color: var(--acid);
+}
+.readToolbar button:disabled {
+  opacity: 0.4;
+  cursor: wait;
+}
+
+/* Chain read panel */
+.chainRead {
+  border: 1px solid var(--line);
+  background: var(--ink);
+  padding: 13px;
+  margin-bottom: 6px;
+}
+.chainReadHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+.chainReadHead span {
+  color: var(--blue);
+  font: 700 7px/1 var(--mono);
+  letter-spacing: 0.1em;
+}
+.chainReadHead small {
+  color: var(--muted-2);
+  font: 600 7px/1 var(--mono);
+}
+.chainReadGrid {
+  display: grid;
+  gap: 2px;
+}
+.readRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px dashed color-mix(in srgb, var(--line) 60%, transparent);
+}
+.readRow:last-child {
+  border-bottom: 0;
+}
+.readRow span {
+  color: var(--muted);
+  font-size: 10px;
+}
+.readRow strong {
+  font: 650 9px/1.3 var(--mono);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.readRow[data-state="ok"] strong {
+  color: var(--acid);
+}
+.readRow[data-state="bad"] strong {
+  color: var(--red);
+}
+.readRow[data-state="warn"] strong {
+  color: var(--orange);
+}
+.chainReadNote {
+  margin: 11px 0 0;
+  color: var(--muted-2);
+  font: 500 8px/1.5 var(--mono);
+}
+
+/* Blockers */
+.blockerList {
+  list-style: none;
+  margin: 10px 0;
+  padding: 12px 13px;
+  border: 1px solid color-mix(in srgb, var(--red) 55%, var(--line));
+  background: color-mix(in srgb, var(--red) 7%, transparent);
+  display: grid;
+  gap: 7px;
+}
+.blockerList li {
+  color: var(--red);
+  font: 600 9px/1.5 var(--mono);
+}
+.blockerList li::before {
+  content: "✗ ";
+}
+
+/* Signed bounds */
+.boundsCard {
+  margin: 16px 0;
+  border: 1px solid color-mix(in srgb, var(--blue) 55%, var(--line));
+  background: color-mix(in srgb, var(--blue) 7%, transparent);
+}
+.boundsHead {
+  padding: 10px 13px;
+  border-bottom: 1px solid color-mix(in srgb, var(--blue) 35%, var(--line));
+}
+.boundsHead span {
+  color: var(--blue);
+  font: 700 7px/1 var(--mono);
+  letter-spacing: 0.09em;
+}
+.boundRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px;
+}
+.boundRow + .boundRow {
+  border-top: 1px dashed color-mix(in srgb, var(--line) 70%, transparent);
+}
+.boundRow strong {
+  display: block;
+  font: 650 9px/1 var(--mono);
+  margin-bottom: 5px;
+}
+.boundRow span {
+  color: var(--muted-2);
+  font: 500 8px/1.4 var(--mono);
+}
+.boundRow b {
+  color: var(--blue);
+  font: 700 11px/1.2 var(--mono);
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.boundsNote {
+  margin: 0;
+  padding: 10px 13px;
+  border-top: 1px dashed color-mix(in srgb, var(--line) 70%, transparent);
+  color: var(--muted);
+  font: 500 8px/1.5 var(--mono);
+}
+
+/* Stage rail */
+.stageRail {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 14px 0 0;
+  padding: 0;
+}
+.stageRail li {
+  flex: 1 1 auto;
+  text-align: center;
+  border: 1px solid var(--line);
+  padding: 6px 4px;
+  color: var(--muted-2);
+  font: 700 6.5px/1 var(--mono);
+  letter-spacing: 0.08em;
+}
+.stageRail li[data-state="active"] {
+  color: var(--ink);
+  background: var(--orange);
+  border-color: var(--orange);
+}
+.stageRail li[data-state="done"] {
+  color: var(--acid);
+  border-color: color-mix(in srgb, var(--acid) 60%, var(--line));
+}
+
+/* Receipts */
+.receipt {
+  margin-top: 15px;
+  padding: 13px;
+  border: 1px solid var(--acid);
+  background: var(--acid-soft);
+}
+.receipt[data-status="mismatch"] {
+  border-color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 8%, transparent);
+}
+.receipt[data-status="failed"] {
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 7%, transparent);
+}
+.receipt[data-status="unconfirmed"] {
+  border-color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 8%, transparent);
+}
+.receiptHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.receiptHead span {
+  font: 750 8px/1 var(--mono);
+  letter-spacing: 0.09em;
+}
+.receipt[data-status="verified"] .receiptHead span {
+  color: var(--acid);
+}
+.receipt[data-status="mismatch"] .receiptHead span,
+.receipt[data-status="unconfirmed"] .receiptHead span {
+  color: var(--orange);
+}
+.receipt[data-status="failed"] .receiptHead span {
+  color: var(--red);
+}
+.receiptHead small {
+  color: var(--muted-2);
+  font: 600 7px/1 var(--mono);
+}
+.receiptTx {
+  display: inline-block;
+  margin: 10px 0 4px;
+  color: var(--blue);
+  font: 650 9px/1 var(--mono);
+  border-bottom: 1px dashed var(--blue);
+}
+.receiptCopy {
+  font: 500 9px/1.55 var(--mono);
+  color: var(--muted);
+  margin: 9px 0 0;
+}
+.checkList {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.checkList li {
+  display: flex;
+  gap: 9px;
+  align-items: start;
+}
+.checkList li b {
+  font-size: 10px;
+  color: var(--acid);
+}
+.checkList li[data-ok="false"] b {
+  color: var(--red);
+}
+.checkList li strong {
+  display: block;
+  font: 650 9px/1.3 var(--mono);
+}
+.checkList li span {
+  color: var(--muted-2);
+  font: 500 8px/1.4 var(--mono);
+  overflow-wrap: anywhere;
+}
+.receiptLogs {
+  margin: 12px 0 0;
+}
+.receiptLogs summary {
+  color: var(--muted);
+  font: 650 8px/1 var(--mono);
+  cursor: pointer;
+}
+.receiptLogs pre {
+  margin: 8px 0 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: var(--ink);
+  color: var(--muted);
+  font: 500 7.5px/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 200px;
+  overflow: auto;
+}
+.receiptOffer {
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--line-bright);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.receiptOffer > div {
+  display: grid;
+  gap: 4px;
+}
+.receiptOffer span {
+  color: var(--muted-2);
+  font: 700 6.5px/1 var(--mono);
+}
+.receiptOffer strong {
+  font: 700 10px/1 var(--mono);
+}
+.copyButton {
+  border: 1px solid var(--line-bright);
+  background: transparent;
+  color: var(--muted);
+  padding: 8px 10px;
+  font: 700 7px/1 var(--mono);
+  cursor: pointer;
+}
+.copyButton:hover {
+  color: var(--acid);
+  border-color: var(--acid);
+}
+.expiryChoices {
+  margin-bottom: 4px;
+}

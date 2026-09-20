@@ -104,3 +104,64 @@ test("prices SpaceX-style scaled UI amounts after transfer fees", () => {
 test("supports the observed OpenAI 1.4861347 multiplier without floating point", () => {
   assert.equal(calculateScaledAmountRaw(990_025_000n, 1_486_134_700n), 1_471_310_506n);
 });
+
+test("applyUiMultiplierAsProgram reproduces on-chain f64 truncation", async () => {
+  const { applyUiMultiplierAsProgram } = await import("../src/index");
+  // Rust: apply_scaled_ui_multiplier(990_025_000, 1.486_134_7) == 1_471_310_506
+  assert.equal(applyUiMultiplierAsProgram(990_025_000n, 1.486_134_7), 1_471_310_506n);
+  assert.equal(applyUiMultiplierAsProgram(990_025_000n, 5.0), 4_950_125_000n);
+  assert.equal(applyUiMultiplierAsProgram(990_025_000n, 1.0), 990_025_000n);
+  assert.equal(applyUiMultiplierAsProgram(0n, 1.486_134_7), 0n);
+  assert.equal(applyUiMultiplierAsProgram(u64Max(), 1.0), u64Max());
+  assert.throws(() => applyUiMultiplierAsProgram(990_025_000n, 0), RangeError);
+  assert.throws(() => applyUiMultiplierAsProgram(990_025_000n, Number.NaN), RangeError);
+  assert.throws(() => applyUiMultiplierAsProgram(2n ** 53n, 1.5), RangeError);
+  // The identity fast path preserves the full u64 range, as on-chain.
+  assert.equal(applyUiMultiplierAsProgram(2n ** 53n, 1.0), 2n ** 53n);
+});
+
+test("calculateQuoteRawForScaledAmount prices already-scaled receipts", async () => {
+  const { calculateQuoteRaw, calculateQuoteRawForScaledAmount } = await import("../src/index");
+
+  const scaledQuote = calculateQuoteRawForScaledAmount({
+    scaledBaseAmountRaw: 4_950_125_000n,
+    baseDecimals: 9,
+    quoteDecimals: 6,
+    markPriceE6: 100_000_000n,
+    offsetBps: 0,
+  });
+  assert.equal(scaledQuote, 495_012_500n);
+
+  // The convenience API agrees with the two-step program-mirror path.
+  const convenience = calculateQuoteRaw({
+    baseAmountRaw: 990_025_000n,
+    baseDecimals: 9,
+    quoteDecimals: 6,
+    markPriceE6: 100_000_000n,
+    offsetBps: 0,
+    uiMultiplierE9: 5_000_000_000n,
+  });
+  assert.equal(scaledQuote, convenience);
+
+  assert.equal(
+    calculateQuoteRawForScaledAmount({
+      scaledBaseAmountRaw: 1_471_310_506n,
+      baseDecimals: 9,
+      quoteDecimals: 6,
+      markPriceE6: 152_500_000n,
+      offsetBps: -300,
+    }),
+    calculateQuoteRaw({
+      baseAmountRaw: 990_025_000n,
+      baseDecimals: 9,
+      quoteDecimals: 6,
+      markPriceE6: 152_500_000n,
+      offsetBps: -300,
+      uiMultiplierE9: 1_486_134_700n,
+    }),
+  );
+});
+
+function u64Max(): bigint {
+  return 0xffff_ffff_ffff_ffffn;
+}

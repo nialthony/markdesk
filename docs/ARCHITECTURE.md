@@ -54,7 +54,36 @@ A separate Rust workspace builds MarkDesk as SBF, runs it through `solana-progra
 
 ### `apps/web`
 
-The first web milestone is intentionally read-only. It renders live/fallback market data and deterministic offer previews. Wallet buttons and transaction states will only ship alongside RPC confirmation and account re-reads.
+The market board renders live/fallback PreStocks data. The execution console implements the wallet
+transaction pipeline:
+
+1. **Wallet connect** through the Solana Wallet Standard (Phantom, Solflare, Backpack register
+   automatically); no proprietary adapter dependency.
+2. **Cluster-aware RPC** from `NEXT_PUBLIC_SOLANA_CLUSTER`, `NEXT_PUBLIC_SOLANA_RPC_URL`, and
+   `NEXT_PUBLIC_MARKDESK_PROGRAM_ID`; the cluster, program deployment, and Explorer links always
+   reflect the resolved configuration.
+3. **Read-before-sign**: the console re-reads config, mark (price, timestamp, sequence, freshness),
+   the base mint's active and scheduled fee epochs, active and pending scaled-UI multipliers, pause
+   and freeze state, permanent delegate, and transfer-hook state, plus wallet balances. The same
+   extension reader powers the dated mainnet inspector.
+4. **Transaction builders** for `create_offer`, `fill_offer`, and `cancel_offer` with account
+   ordering that mirrors the program's `#[derive(Accounts)]` structs, explicit compute-unit
+   budgets, and idempotent ATA creation for missing taker/maker accounts.
+5. **Simulate before signing**: the unsigned transaction is simulated against the cluster; the
+   wallet is only asked for a signature after a clean simulation.
+6. **Explicit signed bounds** shown before the button: minimum escrow credit (create); expected
+   mark sequence, minimum buyer net, and maximum quote debit (fill); minimum maker net return
+   (cancel).
+7. **Blockheight-aware confirmation** (`getLatestBlockhash` + `confirmTransaction` at `confirmed`),
+   then account re-reads and Anchor event decoding.
+8. **Success only after verification**: the receipt renders `VERIFIED ON-CHAIN` exclusively when
+   balance deltas, vault/Offer closure, and the settlement event all match the signed plan. A
+   confirmed-but-unverified transaction renders as a mismatch, and an unconfirmed one links to the
+   Explorer instead of claiming success.
+
+The UI keeps its **read-only protocol preview** label until the devnet two-wallet
+create → fill → cancel run is actually verified; until the program is deployed, every flow renders
+its honest blockers instead of a disabled mystery button.
 
 ## Price representation
 

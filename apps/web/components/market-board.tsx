@@ -3,7 +3,7 @@
 import { MARKDESK_FLAGSHIP_MINT, type MarketCatalog, type PreStockAsset } from "@markdesk/core";
 import { useMemo, useState } from "react";
 import { ArrowUpRight } from "./icons";
-import { OrderComposer } from "./order-composer";
+import { TradeConsole } from "./trade-console";
 
 const usd = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -125,7 +125,9 @@ export function MarketBoard({ catalog }: { catalog: MarketCatalog }) {
           </div>
         </div>
 
-        {selected ? <OrderComposer key={selected.symbol} asset={selected} /> : null}
+        {selected ? (
+          <TradeConsole key={selected.symbol} asset={selected} assets={catalog.assets} />
+        ) : null}
       </div>
     </section>
   );

@@ -1,6 +1,7 @@
 import { ArrowUpRight, Clock, Layers, Shield } from "@/components/icons";
 import { Logo } from "@/components/logo";
 import { MarketBoard } from "@/components/market-board";
+import { WalletDock } from "@/components/wallet-dock";
 import { getMarketCatalog } from "@/lib/catalog";
 
 export default async function Home() {
@@ -22,9 +23,12 @@ export default async function Home() {
           <a href="#protocol">Protocol</a>
           <a href="#build-status">Build status</a>
         </div>
-        <a className="navCta" href="#market">
-          Open board <ArrowUpRight />
-        </a>
+        <div className="navRight">
+          <WalletDock />
+          <a className="navCta" href="#market">
+            Open board <ArrowUpRight />
+          </a>
+        </div>
       </nav>
 
       <section className="hero shell">
@@ -177,16 +181,20 @@ export default async function Home() {
             ["Eight-mint extension audit", "DONE"],
             ["Fee + scaled-UI quote engine", "TESTED"],
             ["Withheld-fee vault closure", "CODED"],
-            ["Anchor settlement core", "INITIAL"],
-            ["Wallet transaction UI", "NEXT"],
-            ["Devnet deployment", "PENDING"],
+            ["Anchor settlement core", "SBF-TESTED"],
+            ["Wallet transaction flows", "CLIENT-READY"],
+            ["Devnet two-wallet test", "PENDING"],
           ].map(([label, status]) => (
             <div className="statusRow" key={label}>
               <span>{label}</span>
               <strong data-status={status}>{status}</strong>
             </div>
           ))}
-          <p>No fake fills. No simulated success presented as on-chain execution.</p>
+          <p>
+            No fake fills. The console simulates before signing and shows success only after
+            confirmed balances and closed accounts are re-read. Execution stays gated until the
+            program is deployed and the devnet two-wallet run passes.
+          </p>
         </div>
       </section>
 

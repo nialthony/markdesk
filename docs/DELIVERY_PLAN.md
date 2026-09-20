@@ -19,7 +19,7 @@ MarkDesk is a Solana escrow where PreStocks holders post offers relative to the 
 - [x] SBF validator-runtime integration tests with extension-enabled fixtures
 - [x] Measure create / fill / cancel SBF compute and enforce CI ceilings
 - [ ] Enable ANDURIL end-to-end
-- [ ] Wallet create / cancel / fill flows with RPC confirmation
+- [x] Wallet create / cancel / fill client flows (connect, read-before-sign, build, simulate, signed bounds, blockheight-aware confirmation, verified receipts) — unit-tested against the SBF vectors; devnet execution still pending
 - [ ] Devnet deployment and Explorer links
 - [ ] 90-second demo video
 - [ ] Judge-oriented submission page

@@ -181,3 +181,56 @@ export function applyOffsetToPrice(markPrice: number, offsetBps: number): number
   validateOffsetBps(offsetBps);
   return markPrice * (1 + offsetBps / 10_000);
 }
+
+export interface ScaledQuoteInput {
+  /**
+   * Base amount with the scaled-UI multiplier already applied, mirroring the
+   * program's `scaled_amount_for_quote` output exactly.
+   */
+  scaledBaseAmountRaw: bigint;
+  baseDecimals: number;
+  quoteDecimals: number;
+  markPriceE6: bigint;
+  offsetBps: number;
+}
+
+/**
+ * Prices an already-scaled buyer receipt. The wallet flow uses this variant so
+ * the client can reproduce the program's `f64` scaled-amount truncation first
+ * (see `applyUiMultiplierAsProgram`) and then price it with exact integer
+ * math, instead of re-deriving the scale from a 1e9 fixed-point multiplier.
+ */
+export function calculateQuoteRawForScaledAmount(input: ScaledQuoteInput): bigint {
+  const { scaledBaseAmountRaw, baseDecimals, quoteDecimals, markPriceE6, offsetBps } = input;
+  if (scaledBaseAmountRaw <= 0n) throw new RangeError("scaledBaseAmountRaw must be positive");
+  if (markPriceE6 <= 0n) throw new RangeError("markPriceE6 must be positive");
+  validateOffsetBps(offsetBps);
+
+  const offsetFactor = BPS_SCALE + BigInt(offsetBps);
+  const numerator = scaledBaseAmountRaw * markPriceE6 * pow10(quoteDecimals) * offsetFactor;
+  const denominator = pow10(baseDecimals) * PRICE_SCALE * BPS_SCALE;
+  return ceilDiv(numerator, denominator);
+}
+
+/**
+ * Reproduces the on-chain scaled-UI computation exactly: the program widens the
+ * f32 multiplier to f64, multiplies the raw amount, and truncates. JavaScript
+ * numbers are f64, so this mirror is bit-exact for raw amounts below 2^53.
+ */
+export function applyUiMultiplierAsProgram(rawAmount: bigint, multiplier: number): bigint {
+  if (rawAmount < 0n) throw new RangeError("rawAmount must be non-negative");
+  if (!Number.isFinite(multiplier) || multiplier <= 0) {
+    throw new RangeError("multiplier must be positive and finite");
+  }
+  // The program returns the raw amount unchanged for the identity multiplier,
+  // preserving all 64 bits without an f64 round-trip.
+  if (multiplier === 1) return rawAmount;
+  if (rawAmount > 9_007_199_254_740_991n) {
+    throw new RangeError("rawAmount exceeds the exact f64 integer range (2^53 - 1)");
+  }
+  const scaled = Number(rawAmount) * multiplier;
+  if (!Number.isFinite(scaled) || scaled < 0) {
+    throw new RangeError("scaled amount is not representable");
+  }
+  return BigInt(Math.trunc(scaled));
+}
