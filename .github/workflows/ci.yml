@@ -49,6 +49,6 @@ jobs:
           sh -c "$(curl -sSfL https://release.anza.xyz/v3.0.7/install)"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
       - run: cargo fmt --manifest-path tests/validator/Cargo.toml -- --check
-      - run: cargo build-sbf --manifest-path programs/markdesk/Cargo.toml --tools-version v1.54 --force-tools-install --locked
+      - run: cargo build-sbf --manifest-path programs/markdesk/Cargo.toml --tools-version v1.54 --force-tools-install -- --locked
       - run: CARGO_TARGET_DIR="$PWD/target" cargo test --manifest-path tests/validator/Cargo.toml --locked
       - run: CARGO_TARGET_DIR="$PWD/target" cargo clippy --manifest-path tests/validator/Cargo.toml --all-targets --locked -- -D warnings

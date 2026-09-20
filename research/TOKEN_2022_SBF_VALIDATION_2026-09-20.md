@@ -100,6 +100,7 @@ cargo build-sbf \
   --manifest-path programs/markdesk/Cargo.toml \
   --tools-version v1.54 \
   --force-tools-install \
+  -- \
   --locked
 
 CARGO_TARGET_DIR="$PWD/target" \
