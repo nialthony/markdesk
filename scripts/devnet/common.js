@@ -46,13 +46,40 @@ export function keypairSigner(keypair) {
  * Sends a transaction with an explicit fresh blockhash. web3.js may fill one
  * implicitly, but devnet latency makes the explicit path deterministic.
  */
+/**
+ * Signs and confirms a transaction, retrying with a FRESH blockhash when a
+ * send fails. Devnet (especially from CI runner IPs that get briefly 429
+ * throttled) can spend a minute inside send retries, by which time the
+ * original blockhash has expired — re-sending the same stale transaction can
+ * never land, so each attempt rebuilds and re-signs from the instructions.
+ */
 export async function confirmTransactionWithPayer(connection, transaction, signers) {
-    const { blockhash } = await connection.getLatestBlockhash("confirmed");
-    transaction.recentBlockhash = blockhash;
-    return sendAndConfirmTransaction(connection, transaction, signers, {
-        commitment: "confirmed",
-        maxRetries: 5,
-    });
+    const feePayer = transaction.feePayer ?? signers[0]?.publicKey;
+    if (!feePayer) {
+        throw new Error("confirmTransactionWithPayer: no fee payer on the transaction or in signers");
+    }
+    const maxAttempts = 4;
+    let lastError;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        try {
+            const { blockhash } = await connection.getLatestBlockhash("confirmed");
+            const fresh = new Transaction({ feePayer, recentBlockhash: blockhash });
+            fresh.add(...transaction.instructions);
+            return await sendAndConfirmTransaction(connection, fresh, signers, {
+                commitment: "confirmed",
+                maxRetries: 2,
+            });
+        }
+        catch (error) {
+            lastError = error;
+            const message = error instanceof Error ? error.message : String(error);
+            console.warn(`· send attempt ${attempt}/${maxAttempts} failed: ${message.slice(0, 200)}`);
+            if (attempt < maxAttempts) {
+                await new Promise((sleep) => setTimeout(sleep, 4_000));
+            }
+        }
+    }
+    throw lastError;
 }
 /**
  * Ensures a wallet holds at least `minimumLamports`. When `sponsor` is given,

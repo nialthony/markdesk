@@ -143,15 +143,20 @@ jobs:
 
       - name: Deploy the program to devnet
         run: |
+          set -euo pipefail
           solana program deploy target/deploy/markdesk.so \
             --program-id target/deploy/markdesk-keypair.json 2>&1 | tee deploy.log
           solana program show "$PROGRAM_ID"
 
       - name: Bootstrap the protocol
-        run: npm run devnet:bootstrap -- --program "$PROGRAM_ID" 2>&1 | tee bootstrap.log
+        run: |
+          set -euo pipefail
+          npm run devnet:bootstrap -- --program "$PROGRAM_ID" 2>&1 | tee bootstrap.log
 
       - name: Two-wallet flow check
-        run: npm run devnet:flow-check -- --program "$PROGRAM_ID" 2>&1 | tee flow-check.log
+        run: |
+          set -euo pipefail
+          npm run devnet:flow-check -- --program "$PROGRAM_ID" 2>&1 | tee flow-check.log
 
       - name: Post run logs to the anchor issue
         if: always()
