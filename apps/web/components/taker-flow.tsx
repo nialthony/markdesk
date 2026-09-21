@@ -4,7 +4,6 @@ import { PRESTOCKS_MINTS, type PreStockAsset } from "@markdesk/core";
 import { PublicKey } from "@solana/web3.js";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Shield } from "./icons";
 import {
   Blockers,
   BoundsCard,
@@ -165,8 +164,8 @@ export function TakerFlow({ assets }: { assets: PreStockAsset[] }) {
       {readError ? <Blockers items={[readError]} /> : null}
       {wallet.publicKey === null ? (
         <p className="composerNotice">
-          <Shield /> Connect a wallet to review and fill an offer. Filling prices the buyer&apos;s
-          net receipt against a fresh on-chain mark and pays the maker in USDC atomically.
+          Connect a wallet to review and fill an offer. Filling prices the buyer&apos;s net receipt
+          against a fresh on-chain mark and pays the maker in USDC atomically.
         </p>
       ) : null}
 
@@ -231,7 +230,7 @@ export function TakerFlow({ assets }: { assets: PreStockAsset[] }) {
                   ? read.wallet.quote.amountRaw === null
                     ? "no token account"
                     : formatRaw(read.wallet.quote.amountRaw, quoteDecimals)
-                  : "—"}
+                  : "n/a"}
               </strong>
             </div>
           </div>
@@ -318,8 +317,7 @@ export function TakerFlow({ assets }: { assets: PreStockAsset[] }) {
                       ? "Sending…"
                       : stage === "confirming"
                         ? "Confirming…"
-                        : "Verifying…"}{" "}
-              <ArrowUpRight />
+                        : "Verifying…"}
             </button>
 
             {outcome ? <FlowReceipt outcome={outcome} /> : null}

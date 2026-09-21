@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { WalletProvider } from "@/lib/wallet/provider";
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/fraunces/wght-italic.css";
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MarkDesk — mark-relative private market orders",
+  title: "MarkDesk / mark-relative private market orders",
   description:
     "Create auditable PreStocks offers relative to the latest official mark and settle atomically on Solana.",
   metadataBase: new URL("https://markdesk.invalid"),

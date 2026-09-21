@@ -2,7 +2,6 @@
 
 import { PublicKey } from "@solana/web3.js";
 import { useCallback, useMemo, useState } from "react";
-import { ArrowUpRight, Shield } from "./icons";
 import { Blockers, BoundsCard, FlowReceipt, StageRail, formatAge, formatRaw } from "./flow-shared";
 import { useSigner, useWallet } from "@/lib/wallet/provider";
 import { getConnection, resolveCluster, shortAddress } from "@/lib/solana/cluster";
@@ -128,8 +127,8 @@ export function CancelFlow() {
       {readError ? <Blockers items={[readError]} /> : null}
       {wallet.publicKey === null ? (
         <p className="composerNotice">
-          <Shield /> Connect the maker wallet to cancel one of your offers. Cancellation returns the
-          vault inventory and closes the vault and Offer PDA.
+          Connect the maker wallet to cancel one of your offers. Cancellation returns the vault
+          inventory and closes the vault and Offer PDA.
         </p>
       ) : null}
 
@@ -214,8 +213,7 @@ export function CancelFlow() {
                       ? "Sending…"
                       : stage === "confirming"
                         ? "Confirming…"
-                        : "Verifying…"}{" "}
-              <ArrowUpRight />
+                        : "Verifying…"}
             </button>
 
             {outcome ? <FlowReceipt outcome={outcome} /> : null}

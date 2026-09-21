@@ -7,15 +7,17 @@
   --line-bright: #3b4943;
   --text: #f2f5ef;
   --muted: #8d9992;
-  --muted-2: #606b65;
-  --acid: #b8ff65;
-  --acid-soft: rgba(184, 255, 101, 0.12);
-  --orange: #ff9a62;
+  --muted-2: #83918a;
+  --accent: #ffb454;
+  --accent-soft: rgba(255, 180, 84, 0.12);
   --red: #ff786d;
   --blue: #8ab4ff;
   --shell: min(1240px, calc(100vw - 40px));
   --mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-  --sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --sans:
+    "Inter Variable", Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --serif: "Fraunces Variable", "Iowan Old Style", Georgia, serif;
 }
 
 * {
@@ -42,6 +44,30 @@ a {
 button {
   color: inherit;
 }
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.searchField:focus-within,
+.amountField:focus-within {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+a,
+button,
+input {
+  transition:
+    color 0.12s ease,
+    background-color 0.12s ease,
+    border-color 0.12s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  a,
+  button,
+  input {
+    transition: none;
+  }
+}
 .shell {
   width: var(--shell);
   margin-inline: auto;
@@ -61,15 +87,15 @@ button {
   align-items: center;
   gap: 10px;
   width: fit-content;
-  font: 700 13px/1 var(--mono);
-  letter-spacing: 0.13em;
+  font: 640 16px/1 var(--serif);
+  letter-spacing: 0.02em;
 }
 .logoMark {
   width: 31px;
   height: 31px;
   display: grid;
   place-items: center;
-  background: var(--acid);
+  background: var(--accent);
   color: var(--ink);
   font: 900 15px/1 var(--sans);
   clip-path: polygon(0 0, 82% 0, 100% 18%, 100% 100%, 18% 100%, 0 82%);
@@ -78,7 +104,7 @@ button {
   display: flex;
   gap: 34px;
   color: var(--muted);
-  font: 500 12px/1 var(--mono);
+  font: 600 12px/1 var(--sans);
   text-transform: uppercase;
 }
 .navLinks a:hover {
@@ -91,12 +117,12 @@ button {
   gap: 8px;
   padding: 11px 15px;
   border: 1px solid var(--line-bright);
-  font: 600 11px/1 var(--mono);
+  font: 650 11px/1 var(--sans);
   text-transform: uppercase;
 }
 .navCta:hover {
-  border-color: var(--acid);
-  color: var(--acid);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .hero {
@@ -108,17 +134,6 @@ button {
   position: relative;
   padding-block: 76px;
 }
-.heroGrid {
-  position: absolute;
-  inset: 0;
-  opacity: 0.26;
-  pointer-events: none;
-  background-image:
-    linear-gradient(var(--line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: linear-gradient(90deg, #000, transparent 68%);
-}
 .heroCopy,
 .heroSignal {
   position: relative;
@@ -126,32 +141,24 @@ button {
 }
 .eyebrow,
 .sectionKicker {
-  font: 650 10px/1.3 var(--mono);
+  font: 700 10px/1.3 var(--sans);
   letter-spacing: 0.18em;
   color: var(--muted);
   text-transform: uppercase;
 }
-.liveDot {
-  width: 6px;
-  height: 6px;
-  display: inline-block;
-  border-radius: 50%;
-  background: var(--acid);
-  box-shadow: 0 0 14px var(--acid);
-  margin-right: 8px;
-}
 .hero h1 {
-  font-size: clamp(57px, 7vw, 96px);
-  line-height: 0.89;
-  letter-spacing: -0.065em;
+  font-family: var(--serif);
+  font-size: clamp(54px, 6.6vw, 92px);
+  line-height: 0.92;
+  letter-spacing: -0.015em;
   margin: 27px 0 30px;
-  font-weight: 650;
+  font-weight: 600;
   max-width: 800px;
 }
 .hero h1 em {
-  color: var(--acid);
-  font-style: normal;
-  font-weight: 400;
+  color: var(--accent);
+  font-style: italic;
+  font-weight: 480;
 }
 .heroLead {
   max-width: 650px;
@@ -166,14 +173,22 @@ button {
   margin-top: 38px;
 }
 .primaryButton {
-  background: var(--acid);
+  background: var(--accent);
   color: var(--ink);
   min-height: 48px;
   padding: 0 20px;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font: 750 11px/1 var(--mono);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+  font: 700 12px/1 var(--sans);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   border: 0;
@@ -183,12 +198,12 @@ button {
 }
 .textButton {
   color: var(--muted);
-  font: 650 11px/1 var(--mono);
+  font: 650 12px/1 var(--sans);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 .textButton span {
-  color: var(--acid);
+  color: var(--accent);
   margin-left: 5px;
 }
 
@@ -204,12 +219,12 @@ button {
   justify-content: space-between;
   padding-bottom: 17px;
   border-bottom: 1px solid var(--line);
-  font: 650 9px/1 var(--mono);
+  font: 650 9px/1 var(--sans);
   letter-spacing: 0.13em;
   color: var(--muted);
 }
 .signalTop span:last-child {
-  color: var(--acid);
+  color: var(--accent);
 }
 .signalAsset {
   display: grid;
@@ -223,12 +238,12 @@ button {
   width: 48px;
   height: 48px;
   border: 1px solid var(--line-bright);
-  background: linear-gradient(145deg, #26302b, #121614);
+  background: var(--panel-2);
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  clip-path: polygon(0 0, 78% 0, 100% 22%, 100% 100%, 22% 100%, 0 78%);
   font: 700 12px/1 var(--mono);
-  color: var(--acid);
+  color: var(--accent);
 }
 .signalAsset div:nth-child(2) {
   display: grid;
@@ -236,15 +251,15 @@ button {
 }
 .signalAsset span {
   color: var(--muted);
-  font: 600 8px/1 var(--mono);
+  font: 600 8px/1 var(--sans);
   letter-spacing: 0.1em;
 }
 .signalAsset strong {
   font: 700 20px/1 var(--mono);
 }
 .signalAsset b {
-  font: 600 24px/1 var(--mono);
-  color: var(--orange);
+  font: 600 26px/1 var(--mono);
+  color: var(--accent);
 }
 .signalTrack {
   height: 4px;
@@ -255,7 +270,7 @@ button {
 .signalTrack span {
   display: block;
   height: 100%;
-  background: linear-gradient(90deg, var(--acid), var(--orange));
+  background: linear-gradient(90deg, var(--blue), var(--accent));
 }
 .signalStats {
   display: grid;
@@ -276,7 +291,7 @@ button {
 }
 .signalStats span {
   color: var(--muted-2);
-  font: 600 7px/1 var(--mono);
+  font: 600 7.5px/1 var(--sans);
   letter-spacing: 0.08em;
 }
 .signalStats strong {
@@ -285,7 +300,7 @@ button {
 .heroSignal > p {
   margin: 17px 0 0;
   color: var(--muted-2);
-  font: 500 9px/1.5 var(--mono);
+  font: 500 10px/1.5 var(--sans);
 }
 
 .ticker {
@@ -303,11 +318,11 @@ button {
   gap: 35px;
   padding-inline: 20px;
   color: var(--muted);
-  font: 650 9px/1 var(--mono);
+  font: 700 9.5px/1 var(--sans);
   letter-spacing: 0.12em;
 }
 .ticker i {
-  color: var(--acid);
+  color: var(--accent);
   font-size: 6px;
   font-style: normal;
 }
@@ -325,16 +340,17 @@ button {
 .protocol h2,
 .truth h2 {
   margin: 10px 0 0;
-  font-size: clamp(34px, 4vw, 54px);
-  line-height: 1;
-  letter-spacing: -0.045em;
-  font-weight: 550;
+  font-family: var(--serif);
+  font-size: clamp(32px, 3.8vw, 50px);
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  font-weight: 560;
 }
 .sourcePill {
   border: 1px solid var(--line);
   padding: 10px 12px;
   color: var(--muted);
-  font: 600 9px/1 var(--mono);
+  font: 650 9px/1 var(--sans);
   letter-spacing: 0.07em;
   text-transform: uppercase;
   display: flex;
@@ -345,10 +361,10 @@ button {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--acid);
+  background: var(--accent);
 }
 .sourcePill[data-source="snapshot"] span {
-  background: var(--orange);
+  background: var(--blue);
 }
 .marketLayout {
   display: grid;
@@ -408,12 +424,12 @@ button {
 }
 .filterTabs button[aria-pressed="true"] {
   color: var(--ink);
-  background: var(--acid);
+  background: var(--accent);
 }
 .marketTableHead,
 .marketRow {
   display: grid;
-  grid-template-columns: 1.55fr 1fr 1fr 0.85fr 1fr 25px;
+  grid-template-columns: 1.6fr 1fr 1fr 0.9fr 1fr;
   align-items: center;
   column-gap: 10px;
 }
@@ -422,7 +438,7 @@ button {
   padding-inline: 17px;
   border-bottom: 1px solid var(--line);
   color: var(--muted-2);
-  font: 650 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
   letter-spacing: 0.1em;
 }
 .marketRow {
@@ -446,7 +462,7 @@ button {
   inset-block: 0;
   left: 0;
   width: 2px;
-  background: var(--acid);
+  background: var(--accent);
 }
 .companyCell {
   display: flex;
@@ -483,31 +499,25 @@ button {
   font: 700 9px/1 var(--mono);
 }
 .basisCell[data-direction="up"] {
-  color: var(--orange);
-  background: rgba(255, 154, 98, 0.09);
+  color: var(--accent);
+  background: var(--accent-soft);
 }
 .basisCell[data-direction="down"] {
-  color: var(--acid);
-  background: var(--acid-soft);
-}
-.rowArrow {
-  color: var(--muted-2);
-}
-.marketRow[data-selected="true"] .rowArrow {
-  color: var(--acid);
+  color: var(--blue);
+  background: color-mix(in srgb, var(--blue) 10%, transparent);
 }
 .noResults {
   padding: 50px;
   text-align: center;
   color: var(--muted);
-  font: 11px/1 var(--mono);
+  font: 500 12px/1 var(--sans);
 }
 .marketFootnote {
   display: flex;
   justify-content: space-between;
   padding: 14px 17px;
   color: var(--muted-2);
-  font: 500 8px/1 var(--mono);
+  font: 500 9px/1 var(--sans);
 }
 .marketFootnote a {
   color: var(--muted);
@@ -516,7 +526,7 @@ button {
   gap: 5px;
 }
 .marketFootnote a:hover {
-  color: var(--acid);
+  color: var(--accent);
 }
 
 .composer {
@@ -533,15 +543,16 @@ button {
 }
 .composerHeader h2 {
   margin: 7px 0 0;
-  font-size: 24px;
-  letter-spacing: -0.035em;
-  font-weight: 550;
+  font-family: var(--serif);
+  font-size: 25px;
+  letter-spacing: -0.01em;
+  font-weight: 580;
 }
 .liveBadge {
-  border: 1px solid var(--acid);
-  color: var(--acid);
+  border: 1px solid var(--accent);
+  color: var(--accent);
   padding: 6px 7px;
-  font: 700 7px/1 var(--mono);
+  font: 750 8px/1 var(--sans);
   letter-spacing: 0.08em;
 }
 .selectedAsset {
@@ -572,7 +583,7 @@ button {
 }
 .selectedMark span {
   color: var(--muted-2);
-  font: 600 7px/1 var(--mono);
+  font: 600 7.5px/1 var(--sans);
 }
 .selectedMark strong {
   font: 650 12px/1 var(--mono);
@@ -582,30 +593,30 @@ button {
   gap: 6px;
   margin: -8px 0 20px;
   padding: 11px 12px;
-  border: 1px solid color-mix(in srgb, var(--acid) 45%, var(--line));
-  background: var(--acid-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: var(--accent-soft);
 }
 .compatibilityNotice strong {
-  color: var(--acid);
-  font: 700 7px/1 var(--mono);
+  color: var(--accent);
+  font: 750 7.5px/1 var(--sans);
   letter-spacing: 0.08em;
 }
 .compatibilityNotice span {
   color: var(--muted);
-  font: 500 8px/1.5 var(--mono);
+  font: 500 10px/1.55 var(--sans);
 }
 .compatibilityNotice[data-level="critical"] {
-  border-color: color-mix(in srgb, var(--orange) 65%, var(--line));
-  background: color-mix(in srgb, var(--orange) 8%, transparent);
+  border-color: color-mix(in srgb, var(--red) 65%, var(--line));
+  background: color-mix(in srgb, var(--red) 8%, transparent);
 }
 .compatibilityNotice[data-level="critical"] strong {
-  color: var(--orange);
+  color: var(--red);
 }
 .fieldLabel {
   display: block;
   margin-bottom: 8px;
   color: var(--muted);
-  font: 650 8px/1 var(--mono);
+  font: 700 8.5px/1 var(--sans);
   text-transform: uppercase;
   letter-spacing: 0.09em;
 }
@@ -627,7 +638,7 @@ button {
   font: 500 20px/1 var(--mono);
 }
 .amountField span {
-  color: var(--acid);
+  color: var(--accent);
   font: 700 9px/1 var(--mono);
 }
 .offsetHeading {
@@ -639,17 +650,17 @@ button {
   font: 700 10px/1 var(--mono);
 }
 .negative {
-  color: var(--acid);
+  color: var(--blue);
 }
 .positive {
-  color: var(--orange);
+  color: var(--accent);
 }
 .offsetRange {
   width: 100%;
   height: 4px;
   margin-block: 5px 14px;
   appearance: none;
-  background: linear-gradient(90deg, var(--acid), var(--line) 50%, var(--orange));
+  background: linear-gradient(90deg, var(--blue), var(--line) 50%, var(--accent));
 }
 .offsetRange::-webkit-slider-thumb {
   appearance: none;
@@ -675,8 +686,8 @@ button {
 }
 .offsetButtons button:hover,
 .offsetButtons button.active {
-  color: var(--acid);
-  border-color: var(--acid);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .quoteSummary {
   margin: 21px 0;
@@ -701,13 +712,21 @@ button {
   width: 100%;
   min-height: 48px;
   border: 0;
-  background: var(--acid);
+  background: var(--accent);
   color: var(--ink);
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  font: 750 9px/1 var(--mono);
+  clip-path: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
+  font: 700 11px/1 var(--sans);
   text-transform: uppercase;
   cursor: pointer;
 }
@@ -719,27 +738,27 @@ button {
   display: flex;
   gap: 8px;
   color: var(--muted-2);
-  font: 500 8px/1.55 var(--mono);
+  font: 500 10px/1.6 var(--sans);
   margin: 12px 0 0;
 }
 .composerNotice svg {
   flex: none;
-  color: var(--orange);
+  color: var(--accent);
 }
 .offerBrief {
   margin-top: 15px;
-  border: 1px solid var(--acid);
-  background: var(--acid-soft);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
   padding: 13px;
 }
 .offerBriefTop {
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font: 650 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
 }
 .statusDot {
-  color: var(--orange);
+  color: var(--accent);
 }
 .offerBrief p {
   font-size: 11px;
@@ -750,10 +769,10 @@ button {
   align-items: center;
   gap: 7px;
   color: var(--muted);
-  font: 500 8px/1.4 var(--mono);
+  font: 500 9.5px/1.4 var(--sans);
 }
 .briefRule svg {
-  color: var(--acid);
+  color: var(--accent);
 }
 
 .protocol {
@@ -784,20 +803,18 @@ button {
 .protocolSteps article:last-child {
   border-right: 0;
 }
-.protocolSteps svg {
-  color: var(--acid);
-  margin-top: 45px;
-}
 .stepNumber {
   position: absolute;
   right: 23px;
+  top: 21px;
   color: var(--muted-2);
-  font: 600 9px/1 var(--mono);
+  font: italic 480 26px/1 var(--serif);
 }
 .protocolSteps h3 {
   margin: 18px 0 9px;
-  font-size: 17px;
-  font-weight: 550;
+  font-family: var(--serif);
+  font-size: 19px;
+  font-weight: 600;
 }
 .protocolSteps p {
   color: var(--muted);
@@ -833,8 +850,8 @@ button {
   text-transform: uppercase;
 }
 .truthLinks a:hover {
-  border-color: var(--acid);
-  color: var(--acid);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .statusHeader {
   display: flex;
@@ -842,7 +859,7 @@ button {
   padding-bottom: 19px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
-  font: 650 8px/1 var(--mono);
+  font: 700 8.5px/1 var(--sans);
 }
 .statusRow {
   min-height: 44px;
@@ -863,7 +880,7 @@ button {
 .statusRow strong[data-status="DONE"],
 .statusRow strong[data-status="TESTED"],
 .statusRow strong[data-status="PASSED"] {
-  color: var(--acid);
+  color: var(--accent);
 }
 .statusRow strong[data-status="INITIAL"],
 .statusRow strong[data-status="CODED"] {
@@ -871,12 +888,12 @@ button {
 }
 .statusRow strong[data-status="NEXT"],
 .statusRow strong[data-status="PENDING"] {
-  color: var(--orange);
+  color: var(--muted-2);
 }
 .statusCard > p {
   margin: 18px 0 0;
   color: var(--muted-2);
-  font: 500 8px/1.5 var(--mono);
+  font: 500 10px/1.6 var(--sans);
 }
 .footer {
   min-height: 105px;
@@ -892,7 +909,7 @@ button {
 }
 .footer > span {
   text-align: right;
-  font: 600 8px/1 var(--mono);
+  font: 600 8.5px/1 var(--sans);
 }
 .emptyPage {
   min-height: 100vh;
@@ -903,7 +920,9 @@ button {
   text-align: center;
 }
 .emptyPage h1 {
+  font-family: var(--serif);
   font-size: 45px;
+  font-weight: 600;
   margin: 0;
 }
 
@@ -940,11 +959,7 @@ button {
     height: 65px;
   }
   .navCta {
-    padding: 10px;
-    font-size: 0;
-  }
-  .navCta svg {
-    width: 16px;
+    display: none;
   }
   .hero {
     padding-block: 55px;
@@ -992,12 +1007,21 @@ button {
   }
   .filterTabs button {
     flex: 1;
+    min-height: 44px;
+  }
+  .offsetButtons button {
+    min-height: 44px;
+  }
+  .readToolbar button,
+  .copyButton,
+  .walletIdentity button {
+    min-height: 44px;
   }
   .marketTableHead {
     display: none;
   }
   .marketRow {
-    grid-template-columns: 1.45fr 1fr 0.8fr 20px;
+    grid-template-columns: 1.5fr 1fr 0.9fr;
     min-height: 74px;
   }
   .marketRow .numericCell:nth-of-type(3),
@@ -1074,7 +1098,7 @@ button {
   border: 1px solid var(--line);
   padding: 8px 10px;
   color: var(--muted);
-  font: 700 7px/1 var(--mono);
+  font: 700 8px/1 var(--sans);
   letter-spacing: 0.08em;
 }
 .clusterPill span {
@@ -1084,7 +1108,7 @@ button {
   background: var(--blue);
 }
 .clusterPill[data-cluster="localnet"] span {
-  background: var(--orange);
+  background: var(--muted-2);
 }
 .clusterPill[data-cluster="mainnet-beta"] span {
   background: var(--red);
@@ -1093,11 +1117,11 @@ button {
   position: relative;
 }
 .walletConnectButton {
-  border: 1px solid var(--acid);
-  background: var(--acid);
+  border: 1px solid var(--accent);
+  background: var(--accent);
   color: var(--ink);
   padding: 10px 14px;
-  font: 750 8px/1 var(--mono);
+  font: 700 10px/1 var(--sans);
   letter-spacing: 0.08em;
   cursor: pointer;
 }
@@ -1127,13 +1151,13 @@ button {
   background: transparent;
   color: var(--text);
   padding: 10px 10px;
-  font: 600 11px/1 var(--mono);
+  font: 600 11.5px/1 var(--sans);
   cursor: pointer;
   text-align: left;
 }
 .walletMenu button:hover {
-  border-color: var(--acid);
-  background: var(--acid-soft);
+  border-color: var(--accent);
+  background: var(--accent-soft);
 }
 .walletMenu button small {
   margin-left: auto;
@@ -1145,7 +1169,7 @@ button {
   margin: 0;
   padding: 8px 10px;
   color: var(--muted);
-  font: 500 9px/1.5 var(--mono);
+  font: 500 10px/1.5 var(--sans);
 }
 .walletMenuNote {
   border-top: 1px solid var(--line);
@@ -1166,7 +1190,7 @@ button {
   background: transparent;
   color: var(--muted-2);
   padding: 6px 8px;
-  font: 700 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
   cursor: pointer;
 }
 .walletIdentity button:hover {
@@ -1177,12 +1201,11 @@ button {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: var(--acid);
-  box-shadow: 0 0 8px var(--acid);
+  background: var(--accent);
 }
 .walletError {
   color: var(--red);
-  font: 600 8px/1.3 var(--mono);
+  font: 600 9px/1.3 var(--sans);
   max-width: 180px;
 }
 
@@ -1201,20 +1224,20 @@ button {
   border: 0;
   background: transparent;
   color: var(--muted-2);
-  padding: 10px 4px;
-  font: 700 8px/1 var(--mono);
+  padding: 12px 4px;
+  font: 750 9px/1 var(--sans);
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
 }
 .consoleTabs button.active {
   color: var(--ink);
-  background: var(--acid);
+  background: var(--accent);
 }
 .consoleTabHint {
   margin: 9px 0 4px;
   color: var(--muted-2);
-  font: 500 8px/1.5 var(--mono);
+  font: 500 9.5px/1.5 var(--sans);
 }
 .flowPanel {
   display: grid;
@@ -1228,20 +1251,20 @@ button {
 }
 .readToolbarLabel {
   color: var(--muted-2);
-  font: 700 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
   letter-spacing: 0.1em;
 }
 .readToolbar button {
   border: 1px solid var(--line-bright);
   background: transparent;
   color: var(--muted);
-  padding: 7px 10px;
-  font: 700 7px/1 var(--mono);
+  padding: 9px 10px;
+  font: 700 8px/1 var(--sans);
   cursor: pointer;
 }
 .readToolbar button:hover:not(:disabled) {
-  color: var(--acid);
-  border-color: var(--acid);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .readToolbar button:disabled {
   opacity: 0.4;
@@ -1264,12 +1287,12 @@ button {
 }
 .chainReadHead span {
   color: var(--blue);
-  font: 700 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
   letter-spacing: 0.1em;
 }
 .chainReadHead small {
   color: var(--muted-2);
-  font: 600 7px/1 var(--mono);
+  font: 600 7.5px/1 var(--sans);
 }
 .chainReadGrid {
   display: grid;
@@ -1296,18 +1319,18 @@ button {
   overflow-wrap: anywhere;
 }
 .readRow[data-state="ok"] strong {
-  color: var(--acid);
+  color: var(--accent);
 }
 .readRow[data-state="bad"] strong {
   color: var(--red);
 }
 .readRow[data-state="warn"] strong {
-  color: var(--orange);
+  color: var(--red);
 }
 .chainReadNote {
   margin: 11px 0 0;
   color: var(--muted-2);
-  font: 500 8px/1.5 var(--mono);
+  font: 500 9.5px/1.5 var(--sans);
 }
 
 /* Blockers */
@@ -1322,7 +1345,7 @@ button {
 }
 .blockerList li {
   color: var(--red);
-  font: 600 9px/1.5 var(--mono);
+  font: 600 10px/1.5 var(--sans);
 }
 .blockerList li::before {
   content: "✗ ";
@@ -1340,7 +1363,7 @@ button {
 }
 .boundsHead span {
   color: var(--blue);
-  font: 700 7px/1 var(--mono);
+  font: 700 7.5px/1 var(--sans);
   letter-spacing: 0.09em;
 }
 .boundRow {
@@ -1355,12 +1378,12 @@ button {
 }
 .boundRow strong {
   display: block;
-  font: 650 9px/1 var(--mono);
+  font: 650 10px/1 var(--sans);
   margin-bottom: 5px;
 }
 .boundRow span {
   color: var(--muted-2);
-  font: 500 8px/1.4 var(--mono);
+  font: 500 9px/1.4 var(--sans);
 }
 .boundRow b {
   color: var(--blue);
@@ -1373,7 +1396,7 @@ button {
   padding: 10px 13px;
   border-top: 1px dashed color-mix(in srgb, var(--line) 70%, transparent);
   color: var(--muted);
-  font: 500 8px/1.5 var(--mono);
+  font: 500 9.5px/1.5 var(--sans);
 }
 
 /* Stage rail */
@@ -1389,39 +1412,39 @@ button {
   flex: 1 1 auto;
   text-align: center;
   border: 1px solid var(--line);
-  padding: 6px 4px;
+  padding: 7px 4px;
   color: var(--muted-2);
-  font: 700 6.5px/1 var(--mono);
+  font: 700 7px/1 var(--sans);
   letter-spacing: 0.08em;
 }
 .stageRail li[data-state="active"] {
   color: var(--ink);
-  background: var(--orange);
-  border-color: var(--orange);
+  background: var(--accent);
+  border-color: var(--accent);
 }
 .stageRail li[data-state="done"] {
-  color: var(--acid);
-  border-color: color-mix(in srgb, var(--acid) 60%, var(--line));
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 60%, var(--line));
 }
 
 /* Receipts */
 .receipt {
   margin-top: 15px;
   padding: 13px;
-  border: 1px solid var(--acid);
-  background: var(--acid-soft);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
 }
 .receipt[data-status="mismatch"] {
-  border-color: var(--orange);
-  background: color-mix(in srgb, var(--orange) 8%, transparent);
+  border-color: var(--red);
+  background: color-mix(in srgb, var(--red) 8%, transparent);
 }
 .receipt[data-status="failed"] {
   border-color: var(--red);
   background: color-mix(in srgb, var(--red) 7%, transparent);
 }
 .receipt[data-status="unconfirmed"] {
-  border-color: var(--orange);
-  background: color-mix(in srgb, var(--orange) 8%, transparent);
+  border-color: color-mix(in srgb, var(--blue) 55%, var(--line));
+  background: color-mix(in srgb, var(--blue) 8%, transparent);
 }
 .receiptHead {
   display: flex;
@@ -1430,15 +1453,17 @@ button {
   gap: 8px;
 }
 .receiptHead span {
-  font: 750 8px/1 var(--mono);
+  font: 750 8.5px/1 var(--sans);
   letter-spacing: 0.09em;
 }
 .receipt[data-status="verified"] .receiptHead span {
-  color: var(--acid);
+  color: var(--accent);
 }
-.receipt[data-status="mismatch"] .receiptHead span,
+.receipt[data-status="mismatch"] .receiptHead span {
+  color: var(--red);
+}
 .receipt[data-status="unconfirmed"] .receiptHead span {
-  color: var(--orange);
+  color: var(--blue);
 }
 .receipt[data-status="failed"] .receiptHead span {
   color: var(--red);
@@ -1455,7 +1480,7 @@ button {
   border-bottom: 1px dashed var(--blue);
 }
 .receiptCopy {
-  font: 500 9px/1.55 var(--mono);
+  font: 500 10px/1.6 var(--sans);
   color: var(--muted);
   margin: 9px 0 0;
 }
@@ -1473,14 +1498,14 @@ button {
 }
 .checkList li b {
   font-size: 10px;
-  color: var(--acid);
+  color: var(--accent);
 }
 .checkList li[data-ok="false"] b {
   color: var(--red);
 }
 .checkList li strong {
   display: block;
-  font: 650 9px/1.3 var(--mono);
+  font: 650 10px/1.3 var(--sans);
 }
 .checkList li span {
   color: var(--muted-2);
@@ -1492,7 +1517,7 @@ button {
 }
 .receiptLogs summary {
   color: var(--muted);
-  font: 650 8px/1 var(--mono);
+  font: 650 9px/1 var(--sans);
   cursor: pointer;
 }
 .receiptLogs pre {
@@ -1522,7 +1547,7 @@ button {
 }
 .receiptOffer span {
   color: var(--muted-2);
-  font: 700 6.5px/1 var(--mono);
+  font: 700 7px/1 var(--sans);
 }
 .receiptOffer strong {
   font: 700 10px/1 var(--mono);
@@ -1531,13 +1556,13 @@ button {
   border: 1px solid var(--line-bright);
   background: transparent;
   color: var(--muted);
-  padding: 8px 10px;
-  font: 700 7px/1 var(--mono);
+  padding: 9px 10px;
+  font: 700 8px/1 var(--sans);
   cursor: pointer;
 }
 .copyButton:hover {
-  color: var(--acid);
-  border-color: var(--acid);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .expiryChoices {
   margin-bottom: 4px;

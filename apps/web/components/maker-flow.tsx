@@ -8,7 +8,7 @@ import {
   type PreStockAsset,
 } from "@markdesk/core";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, Clock, Shield } from "./icons";
+import { Clock } from "./icons";
 import {
   Blockers,
   BoundsCard,
@@ -268,9 +268,9 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
             </div>
           </dl>
           <p className="composerNotice">
-            <Shield /> Connect a wallet to unlock the read-before-sign console. The console re-reads
-            the epoch fee, UI multiplier, pause state, and hook state, simulates, and only then
-            requests a signature.
+            Connect a wallet to use the read-before-sign console. The console re-reads the epoch
+            fee, UI multiplier, pause state, and hook state, simulates, and only then requests a
+            signature.
           </p>
         </>
       ) : (
@@ -320,7 +320,7 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
                     </dd>
                   </div>
                   <div>
-                    <dt>Fee leg #1 (maker → vault, withheld)</dt>
+                    <dt>Fee leg #1 (maker to vault, withheld)</dt>
                     <dd>{formatRaw(planResult.plan.inboundFeeRaw, baseDecimals)}</dd>
                   </div>
                   <div>
@@ -328,7 +328,7 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
                     <dd>{formatRaw(planResult.plan.vaultCreditRaw, baseDecimals)}</dd>
                   </div>
                   <div>
-                    <dt>Fee leg #2 (vault → buyer, withheld)</dt>
+                    <dt>Fee leg #2 (vault to buyer, withheld)</dt>
                     <dd>{formatRaw(planResult.plan.outboundFeeRaw, baseDecimals)}</dd>
                   </div>
                   <div>
@@ -394,8 +394,7 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
                           ? "Sending…"
                           : stage === "confirming"
                             ? "Confirming…"
-                            : "Verifying…"}{" "}
-                  <ArrowUpRight />
+                            : "Verifying…"}
                 </button>
 
                 {outcome && executedPlan ? (
@@ -429,8 +428,8 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
               <>
                 <Blockers items={planResult.blockers} />
                 <p className="composerNotice">
-                  <Shield /> Execution stays disabled until every blocker clears. This is the honest
-                  state of the cluster, not a bug.
+                  Execution stays disabled until every blocker clears. This is the honest state of
+                  the cluster, not a bug.
                 </p>
               </>
             )

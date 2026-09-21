@@ -1,7 +1,7 @@
 {
   "source": "https://prestocks.com/api/prestocks",
   "capturedAt": "2026-09-19T16:53:56Z",
-  "label": "Repository fallback snapshot \u2014 not live market data",
+  "label": "Repository fallback snapshot, not live market data",
   "assets": [
     {
       "name": "Anduril PreStocks",

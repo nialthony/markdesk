@@ -5,3 +5,6 @@ target
 coverage
 package-lock.json
 *.svg
+.claude
+.devnet
+CLAUDE.md

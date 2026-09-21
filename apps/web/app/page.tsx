@@ -1,4 +1,4 @@
-import { ArrowUpRight, Clock, Layers, Shield } from "@/components/icons";
+import { ArrowUpRight } from "@/components/icons";
 import { Logo } from "@/components/logo";
 import { MarketBoard } from "@/components/market-board";
 import { WalletDock } from "@/components/wallet-dock";
@@ -26,32 +26,30 @@ export default async function Home() {
         <div className="navRight">
           <WalletDock />
           <a className="navCta" href="#market">
-            Open board <ArrowUpRight />
+            Open the board
           </a>
         </div>
       </nav>
 
       <section className="hero shell">
-        <div className="heroGrid" aria-hidden="true" />
         <div className="heroCopy">
-          <div className="eyebrow">
-            <span className="liveDot" /> STOCKLANA 2026 / PROTOCOL BOOTSTRAP
-          </div>
+          <p className="eyebrow">Stocklana 2026 / protocol bootstrap</p>
           <h1>
-            Trade the mark.
+            Price off the mark.
             <br />
-            <em>Not the noise.</em>
+            <em>Settle on-chain.</em>
           </h1>
           <p className="heroLead">
-            Mark-relative OTC orders for tokenized private markets. Makers define a premium or
-            discount; Solana enforces freshness and settles atomically.
+            Mark-relative OTC orders for tokenized private markets. Makers quote a premium or
+            discount from the latest official mark; the program enforces freshness and settles
+            atomically.
           </p>
           <div className="heroActions">
             <a className="primaryButton" href="#market">
-              Explore live marks <ArrowUpRight />
+              Open the board
             </a>
             <a className="textButton" href="#protocol">
-              How it works <span>↓</span>
+              Read the protocol
             </a>
           </div>
         </div>
@@ -65,12 +63,12 @@ export default async function Home() {
             <div className="signalOrb">{largestGap?.symbol.slice(0, 2) ?? "MD"}</div>
             <div>
               <span>LARGEST ABSOLUTE BASIS</span>
-              <strong>{largestGap?.symbol ?? "—"}</strong>
+              <strong>{largestGap?.symbol ?? "n/a"}</strong>
             </div>
             <b>
               {largestGap
                 ? `${largestGap.premiumBps > 0 ? "+" : ""}${(largestGap.premiumBps / 100).toFixed(2)}%`
-                : "—"}
+                : "n/a"}
             </b>
           </div>
           <div className="signalTrack">
@@ -99,14 +97,14 @@ export default async function Home() {
       <div className="ticker" aria-label="Protocol properties">
         <div>
           <span>MARK-RELATIVE PRICING</span>
-          <i>◆</i>
+          <i>/</i>
           <span>ATOMIC USDC SETTLEMENT</span>
-          <i>◆</i>
+          <i>/</i>
           <span>FRESHNESS ENFORCED</span>
-          <i>◆</i>
+          <i>/</i>
           <span>PRESTOCKS-ONLY WEDGE</span>
-          <i>◆</i>
-          <span>NO HIDDEN CUSTODY</span>
+          <i>/</i>
+          <span>ESCROW YOU CAN AUDIT</span>
         </div>
       </div>
 
@@ -119,14 +117,13 @@ export default async function Home() {
           <p className="sectionKicker">ONE RULE, END TO END</p>
           <h2>Execution with a reference.</h2>
           <p>
-            Fixed-dollar orders become stale. MarkDesk stores the economic intent—an offset from a
-            timestamped mark—then lets the chain enforce the rest.
+            Fixed-dollar orders go stale. MarkDesk stores the economic intent, an offset from a
+            timestamped mark, and lets the program enforce the rest.
           </p>
         </div>
         <div className="protocolSteps">
           <article>
             <span className="stepNumber">01</span>
-            <Clock />
             <h3>Publish the mark</h3>
             <p>
               An authorized publisher normalizes the official source into integer micro-dollars.
@@ -134,7 +131,6 @@ export default async function Home() {
           </article>
           <article>
             <span className="stepNumber">02</span>
-            <Layers />
             <h3>Escrow the offer</h3>
             <p>
               The maker chooses amount, basis-point offset, and expiry. The Offer PDA controls
@@ -143,7 +139,6 @@ export default async function Home() {
           </article>
           <article>
             <span className="stepNumber">03</span>
-            <Shield />
             <h3>Settle atomically</h3>
             <p>A fresh mark prices the fill. Base token and USDC move together or nothing moves.</p>
           </article>
@@ -156,8 +151,8 @@ export default async function Home() {
           <h2>Atomic does not mean oracle-free.</h2>
           <p>
             Version one trusts a configured publisher to reproduce the PreStocks API. The program
-            guarantees authorization, monotonic sequence, freshness, offer terms, and settlement—not
-            the economic truth of the source itself.
+            guarantees authorization, monotonic sequence, freshness, offer terms, and settlement,
+            not the economic truth of the source itself.
           </p>
           <div className="truthLinks">
             <a href="https://prestocks.com/api/prestocks" target="_blank" rel="noreferrer">
@@ -192,18 +187,18 @@ export default async function Home() {
             </div>
           ))}
           <p>
-            No fake fills. The console simulates before signing and shows success only after
-            confirmed balances and closed accounts are re-read. The devnet two-wallet run — create →
-            fill, then create → cancel — passed on 2026-09-21 with every step verified on-chain
-            (program 61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof656teGUw).
+            Success renders only after confirmed balances and closed accounts are re-read on-chain.
+            The devnet two-wallet run (create to fill, then create to cancel) passed on 2026-09-21
+            with every step verified on-chain (program
+            61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof656teGUw).
           </p>
         </div>
       </section>
 
       <footer className="footer shell">
         <Logo />
-        <p>Built in public for Stocklana. Unaudited prototype—do not deposit meaningful value.</p>
-        <span>SEMARANG → SOLANA / 2026</span>
+        <p>Built in public for Stocklana. Unaudited prototype. Do not deposit meaningful value.</p>
+        <span>SEMARANG / SOLANA / 2026</span>
       </footer>
     </main>
   );

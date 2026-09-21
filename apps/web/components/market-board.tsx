@@ -180,9 +180,6 @@ function MarketRow({
         <strong>{compactUsd.format(asset.markValuation)}</strong>
         <small>marked</small>
       </span>
-      <span className="rowArrow" role="cell">
-        →
-      </span>
     </button>
   );
 }

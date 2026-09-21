@@ -9,9 +9,9 @@ import { TakerFlow } from "./taker-flow";
 type Tab = "sell" | "fill" | "cancel";
 
 const TABS: Array<{ key: Tab; label: string; hint: string }> = [
-  { key: "sell", label: "Sell", hint: "Maker — escrow at an offset from the mark" },
-  { key: "fill", label: "Fill", hint: "Taker — pay USDC for a live offer" },
-  { key: "cancel", label: "Cancel", hint: "Maker — recover escrowed inventory" },
+  { key: "sell", label: "Sell", hint: "Maker: escrow at an offset from the mark" },
+  { key: "fill", label: "Fill", hint: "Taker: pay USDC for a live offer" },
+  { key: "cancel", label: "Cancel", hint: "Maker: recover escrowed inventory" },
 ];
 
 /**
@@ -33,7 +33,7 @@ export function TradeConsole({ asset, assets }: { asset: PreStockAsset; assets: 
         </div>
         <span
           className="liveBadge"
-          title="Devnet two-wallet create → fill → cancel verified on-chain (2026-09-21)."
+          title="Devnet two-wallet create to fill to cancel verified on-chain (2026-09-21)."
         >
           LIVE ON DEVNET / READ-WRITE
         </span>

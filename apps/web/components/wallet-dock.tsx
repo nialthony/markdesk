@@ -16,8 +16,15 @@ export function WalletDock() {
     function onPointerDown(event: PointerEvent) {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
     }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
     window.addEventListener("pointerdown", onPointerDown);
-    return () => window.removeEventListener("pointerdown", onPointerDown);
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
   }, [open]);
 
   return (

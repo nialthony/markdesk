@@ -60,7 +60,7 @@ export function BoundsCard({ rows, note }: { rows: BoundRow[]; note?: ReactNode 
   return (
     <div className="boundsCard">
       <div className="boundsHead">
-        <span>SIGNED BOUNDS — REJECTED ON-CHAIN IF VIOLATED</span>
+        <span>SIGNED BOUNDS / REJECTED ON-CHAIN IF VIOLATED</span>
       </div>
       {rows.map((row) => (
         <div className="boundRow" key={row.label}>
@@ -156,7 +156,7 @@ export function FlowReceipt({ outcome, children }: { outcome: FlowOutcome; child
     return (
       <div className="receipt" data-status="mismatch" role="alert">
         <div className="receiptHead">
-          <span>CONFIRMED — VERIFICATION FAILED</span>
+          <span>CONFIRMED / VERIFICATION FAILED</span>
           {outcome.slot !== null ? (
             <small>SLOT {outcome.slot.toLocaleString("en-US")}</small>
           ) : null}
@@ -192,7 +192,7 @@ export function FlowReceipt({ outcome, children }: { outcome: FlowOutcome; child
     return (
       <div className="receipt" data-status="unconfirmed" role="alert">
         <div className="receiptHead">
-          <span>SENT — NOT CONFIRMED</span>
+          <span>SENT / NOT CONFIRMED</span>
         </div>
         <p className="receiptCopy">
           {outcome.detail} The transaction may still land; check the explorer before resubmitting.
@@ -212,7 +212,7 @@ export function FlowReceipt({ outcome, children }: { outcome: FlowOutcome; child
   return (
     <div className="receipt" data-status="failed" role="alert">
       <div className="receiptHead">
-        <span>FAILED — {outcome.stage.toUpperCase()}</span>
+        <span>FAILED / {outcome.stage.toUpperCase()}</span>
       </div>
       <p className="receiptCopy">{outcome.error}</p>
       {outcome.signature ? (

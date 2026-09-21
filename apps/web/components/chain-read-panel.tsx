@@ -41,7 +41,7 @@ export function ChainReadPanel({
   return (
     <div className="chainRead">
       <div className="chainReadHead">
-        <span>CHAIN READ — {read.cluster.label.toUpperCase()}</span>
+        <span>CHAIN READ / {read.cluster.label.toUpperCase()}</span>
         <small>
           EPOCH {read.epoch.toString()} · SLOT READ{" "}
           {new Date(read.readAtMs).toLocaleTimeString("en-US")}
@@ -68,7 +68,7 @@ export function ChainReadPanel({
           value={
             mark
               ? `${formatAge(mark.ageSeconds)} (max ${read.config?.maxMarkAgeSeconds ?? "?"}s)`
-              : "—"
+              : "n/a"
           }
           state={mark ? (mark.fresh ? "ok" : "bad") : "bad"}
         />
@@ -130,7 +130,7 @@ export function ChainReadPanel({
               ? read.wallet.base.amountRaw === null
                 ? "no token account"
                 : `${formatRaw(read.wallet.base.amountRaw, mint?.decimals ?? 9)} ${baseSymbol}`
-              : "—"
+              : "n/a"
           }
           state={read.wallet?.base?.amountRaw ? "ok" : "warn"}
         />
@@ -141,7 +141,7 @@ export function ChainReadPanel({
               ? read.wallet.quote.amountRaw === null
                 ? "no token account"
                 : formatRaw(read.wallet.quote.amountRaw, read.quoteMint?.decimals ?? 6)
-              : "—"
+              : "n/a"
           }
           state={read.wallet?.quote?.amountRaw ? "ok" : "warn"}
         />
