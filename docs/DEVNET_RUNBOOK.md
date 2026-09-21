@@ -13,24 +13,55 @@ mark from the PreStocks API, and the UI labels the row `SYN-ANDURIL / Devnet Syn
 
 - Node.js 20+ and npm 10+ (`npm install`)
 - Rust stable plus Agave CLI `3.0.7` and platform tools `v1.54` (same pins as CI)
-- About 2 devnet SOL for the payer keypair (faucet: `solana airdrop 2` or
-  [faucet.solana.com](https://faucet.solana.com))
+- A funded **persistent devnet payer** (see below)
+
+### Persistent devnet identities (`.devnet/`)
+
+All devnet test identities are **committed** under `.devnet/` (devnet-only
+throwaway keypairs, zero real value — see `.devnet/README.md`): payer,
+publisher, maker, taker, both synthetic mints, and the stable program id.
+Local runs pick them up with:
+
+```bash
+export MARKDESK_KEYS_DIR=.devnet
+```
+
+### One-time payer funding
+
+The CLI faucet (`solana airdrop`) rate-limits shared IPs (CI runners, VPNs), so
+the payer is funded once from a browser:
+
+1. Open <https://faucet.solana.com> and pick **devnet** (its quota is separate
+   from the CLI faucet; a GitHub login helps).
+2. Airdrop repeatedly to the payer address
+   (`solana-keygen pubkey .devnet/markdesk-payer.json`) until it holds
+   **≥ 5.2 SOL** — a first deploy pays buffer + program rent (~5 SOL peak);
+   redeploys of the existing program only need ~2.7 SOL.
+
+Publisher/maker/taker are topped up from the payer by the bootstrap script, and
+a steady-state run burns only fees plus small rent, so one funding session
+lasts many runs.
 
 ## 1. Fix the program id
 
-The committed `declare_id!` is a source placeholder. Generate the deploy keypair and sync the id:
+The program id is **stable**: it is `.devnet/program.json`. The committed
+`declare_id!` in source is a placeholder; CI and local runs sync it:
 
 ```bash
-# With the Anchor CLI (1.2.0):
-anchor keys sync
-
-# Or with plain Agave:
-solana-keygen new -o target/deploy/markdesk-keypair.json --no-bip39-passphrase
+cp .devnet/program.json target/deploy/markdesk-keypair.json
 npx tsx scripts/devnet/program-id.ts target/deploy/markdesk-keypair.json
 # paste the printed declare_id! into programs/markdesk/src/lib.rs and Anchor.toml
 ```
 
-Commit the id change. **Never commit the keypair** (`*keypair.json` and `target/` are gitignored).
+`.devnet/program.json` is the one program keypair that IS committed (devnet
+only); `target/` and `*keypair.json` elsewhere stay gitignored.
+
+## CI runs everything
+
+`.github/workflows/devnet-test.yml` (trigger: push to `arena/**`) syncs the id,
+checks the payer balance (best-effort small airdrops, else a clear error
+pointing at the web faucet), builds, (re)deploys, bootstraps, and runs the
+two-wallet flow check. Logs land as comments on the anchor issue (#1).
 
 ## 2. Build and deploy
 
@@ -43,7 +74,6 @@ cargo build-sbf \
   --locked
 
 solana config set --url devnet
-solana airdrop 2
 solana program deploy target/deploy/markdesk.so \
   --program-id target/deploy/markdesk-keypair.json
 ```
@@ -57,9 +87,8 @@ npm run devnet:bootstrap -- --program <deployed-program-id>
 The bootstrap is idempotent and will:
 
 1. Verify the program is deployed.
-2. Create throwaway keypairs under `var/keys/` (gitignored, mode 0600): payer, publisher,
-   maker, taker, and the synthetic mint keypairs. **Back these up** — losing the payer loses the
-   synthetic mints' mint authority.
+2. Load the persistent keypairs from `.devnet/` (or create throwaway ones under `var/keys/`,
+   gitignored, mode 0600, if `MARKDESK_KEYS_DIR` is unset).
 3. Create the synthetic base mint and a 6-decimal quote mint (or reuse `--base-mint` /
    `--quote-mint`, e.g. devnet USDC `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` — note the
    config's quote mint is immutable once initialized).
@@ -106,7 +135,8 @@ Then update the badge in `apps/web/components/trade-console.tsx`, the status car
 
 ## Operational notes
 
-- Devnet airdrops are rate limited; the scripts top up 1 SOL at a time and poll.
+- Devnet airdrops are rate limited and shared-IP hostile; the payer is funded once via the web
+  faucet (see step 0), and the scripts top up sponsored wallets from it, 1 SOL at a time.
 - Marks go stale after 300 seconds by design; `devnet:flow-check` republishes before running,
   and the Sell/Fill consoles show the mark age and refuse stale marks.
 - The synthetic mint keeps the fixture's issuer powers (permanent delegate, pause authority,
