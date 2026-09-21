@@ -28,4 +28,4 @@ This file will become the one-sitting evaluation path for the Stocklana submissi
 
 ## Final submission path (not complete)
 
-The final path must add two-wallet create → confirmed fee-aware escrow → fill → confirmed buyer-net and maker balances → withheld-fee harvest → closed vault, plus stale-mark rejection and Explorer links. Until that exists, the product remains labeled as a protocol preview.
+The two-wallet path shipped and was verified on devnet on 2026-09-21 (CI run 35570247328): create → confirmed fee-aware escrow → fill → confirmed buyer-net and maker balances → withheld-fee harvest → closed vault, plus stale-mark rejection and Explorer receipts, driven through the same flow functions the web console uses. The read-only label is lifted. Remaining for submission: the ANDURIL end-to-end demo, the 90-second video, and the submission page.

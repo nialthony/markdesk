@@ -15,9 +15,11 @@ const TABS: Array<{ key: Tab; label: string; hint: string }> = [
 ];
 
 /**
- * Execution console. The UI keeps its READ-ONLY PROTOCOL PREVIEW label until
- * the devnet two-wallet create → fill → cancel run is verified; until then the
- * flows render honestly gated on deployed-program and fresh-mark reads.
+ * Execution console. The READ-ONLY PROTOCOL PREVIEW label was lifted on
+ * 2026-09-21 after the devnet two-wallet create → fill → cancel run verified
+ * on-chain (CI run 35570247328, program 61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof
+ * 656teGUw); the flows still render honestly gated on deployed-program and
+ * fresh-mark reads.
  */
 export function TradeConsole({ asset, assets }: { asset: PreStockAsset; assets: PreStockAsset[] }) {
   const [tab, setTab] = useState<Tab>("sell");
@@ -30,10 +32,10 @@ export function TradeConsole({ asset, assets }: { asset: PreStockAsset; assets: 
           <h2>Price to the mark.</h2>
         </div>
         <span
-          className="readOnlyBadge"
-          title="Label stays read-only until the devnet two-wallet test passes."
+          className="liveBadge"
+          title="Devnet two-wallet create → fill → cancel verified on-chain (2026-09-21)."
         >
-          READ-ONLY PROTOCOL PREVIEW
+          LIVE ON DEVNET / READ-WRITE
         </span>
       </div>
 

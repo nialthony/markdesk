@@ -537,9 +537,9 @@ button {
   letter-spacing: -0.035em;
   font-weight: 550;
 }
-.readOnlyBadge {
-  border: 1px solid var(--orange);
-  color: var(--orange);
+.liveBadge {
+  border: 1px solid var(--acid);
+  color: var(--acid);
   padding: 6px 7px;
   font: 700 7px/1 var(--mono);
   letter-spacing: 0.08em;
@@ -861,7 +861,8 @@ button {
   color: var(--blue);
 }
 .statusRow strong[data-status="DONE"],
-.statusRow strong[data-status="TESTED"] {
+.statusRow strong[data-status="TESTED"],
+.statusRow strong[data-status="PASSED"] {
   color: var(--acid);
 }
 .statusRow strong[data-status="INITIAL"],

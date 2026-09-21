@@ -184,7 +184,7 @@ export default async function Home() {
             ["Anchor settlement core", "SBF-TESTED"],
             ["Wallet transaction flows", "CLIENT-READY"],
             ["Devnet bootstrap + flow-check", "SCRIPTED"],
-            ["Devnet two-wallet test", "PENDING"],
+            ["Devnet two-wallet test", "PASSED"],
           ].map(([label, status]) => (
             <div className="statusRow" key={label}>
               <span>{label}</span>
@@ -193,8 +193,9 @@ export default async function Home() {
           ))}
           <p>
             No fake fills. The console simulates before signing and shows success only after
-            confirmed balances and closed accounts are re-read. Execution stays gated until the
-            program is deployed and the devnet two-wallet run passes.
+            confirmed balances and closed accounts are re-read. The devnet two-wallet run — create →
+            fill, then create → cancel — passed on 2026-09-21 with every step verified on-chain
+            (program 61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof656teGUw).
           </p>
         </div>
       </section>

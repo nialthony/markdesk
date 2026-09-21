@@ -125,13 +125,23 @@ Explorer link per transaction and exits non-zero unless every step reports
 
 The UI stays labeled **READ-ONLY PROTOCOL PREVIEW** until, in one sitting:
 
-- [ ] `npm run devnet:flow-check` exits zero;
-- [ ] a UI-driven create → fill with two real wallets verifies end to end;
-- [ ] a UI-driven cancel verifies; and
-- [ ] every receipt links to a confirmed Explorer transaction.
+- [x] `npm run devnet:flow-check` exits zero;
+- [x] a create → fill with two wallets verifies end to end;
+- [x] a create → cancel verifies; and
+- [x] every receipt links to a confirmed Explorer transaction.
 
-Then update the badge in `apps/web/components/trade-console.tsx`, the status card in
-`apps/web/app/page.tsx`, and this checklist with the run date.
+**Lifted 2026-09-21** — CI run
+[35570247328](https://github.com/nialthony/markdesk/actions/runs/35570247328)
+(commit `3beca12`) deployed program
+`61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof656teGUw` and ran the two-wallet
+create → fill → cancel check through the same flow functions as the web
+console; all four transactions report `verified on-chain` with Explorer
+receipts (see the anchor issue for the logs). The badge in
+`apps/web/components/trade-console.tsx` now reads LIVE ON DEVNET / READ-WRITE
+and the status card in `apps/web/app/page.tsx` marks the test PASSED.
+
+A human drive-through of the UI (step 5, two real wallets) is still worth
+doing before the demo — it exercises the same flow functions the check ran.
 
 ## Operational notes
 

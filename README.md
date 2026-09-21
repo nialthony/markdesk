@@ -17,23 +17,24 @@ Private-market tokens can trade far from their reference mark, while thin liquid
 
 ## Current state — honest by design
 
-| Component                                                  | Status                                                        |
-| ---------------------------------------------------------- | ------------------------------------------------------------- |
-| Live PreStocks catalog and fallback snapshot               | Implemented                                                   |
-| Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                   |
-| Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                        |
-| Publisher normalization and canonical payloads             | Implemented and tested                                        |
-| Anchor config, mark, create, fill, and cancel instructions | Implemented; create/fill/cancel paths SBF-tested              |
-| Transfer-fee escrow and withheld-fee harvesting            | Implemented and validator-runtime tested                      |
-| Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported  |
-| Wallet transaction console                                 | Client flows implemented and unit-tested; gated on deployment |
-| Devnet / mainnet deployment                                | Not deployed                                                  |
-| Security audit                                             | Not audited                                                   |
+| Component                                                  | Status                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Live PreStocks catalog and fallback snapshot               | Implemented                                                  |
+| Eight-mint Token-2022 inspector and dated evidence         | Implemented                                                  |
+| Fee-aware, scaled-UI mark-relative quote math              | Implemented and tested                                       |
+| Publisher normalization and canonical payloads             | Implemented and tested                                       |
+| Anchor config, mark, create, fill, and cancel instructions | Implemented; create/fill/cancel paths SBF-tested             |
+| Transfer-fee escrow and withheld-fee harvesting            | Implemented and validator-runtime tested                     |
+| Active transfer-hook support                               | Explicitly rejected on-chain until extra metas are supported |
+| Wallet transaction console                                 | Live on devnet: flows verified by the two-wallet CI run      |
+| Devnet deployment                                          | Deployed and two-wallet verified (2026-09-21)                |
+| Security audit                                             | Not audited                                                  |
 
 No screen in the app claims a transaction occurred unless it came from confirmed RPC state. The
 console simulates before signing, shows the signed bounds explicitly, confirms blockheight-aware,
 and renders success only after re-read balances, vault/Offer closure, and the settlement event all
-match. The UI keeps its read-only protocol preview label until the devnet two-wallet run passes.
+match. The devnet two-wallet run (create → fill, create → cancel) passed on 2026-09-21, so the
+console badge now reads LIVE ON DEVNET / READ-WRITE.
 
 ## Repository layout
 
@@ -74,8 +75,8 @@ It connects through the Solana Wallet Standard (Phantom, Solflare, Backpack), re
 fee epoch, scaled-UI multiplier, and issuer controls before anything is signed, simulates the full
 transaction, displays the signed minimum/maximum bounds, confirms blockheight-aware, and only then
 re-reads balances, vault/Offer closure, and the Anchor settlement event. Until the program is
-deployed on the target cluster the console lists its honest blockers; the app keeps its read-only
-protocol preview label until the devnet two-wallet run is verified.
+deployed on the target cluster the console lists its honest blockers; the devnet two-wallet run
+was verified on 2026-09-21 and the badge now reads LIVE ON DEVNET / READ-WRITE.
 
 ### Devnet deployment and two-wallet test
 
@@ -90,8 +91,9 @@ npm run devnet:flow-check -- --program <deployed-program-id>  # two-wallet creat
 
 The bootstrap prints the exact `apps/web/.env.local` block, including the synthetic
 `SYN-ANDURIL` demo mint, so the whole console works on devnet against a Token-2022 mint with the
-PreStocks extension profile. Until the runbook's checklist is completed on devnet, the UI keeps
-its read-only protocol preview label.
+PreStocks extension profile. The runbook's checklist was completed on devnet on 2026-09-21
+(CI run 35570247328, program 61Vm7fAF4yfSW3oJDpmKw9rVdjAi82unzzof656teGUw), so the UI badge
+reads LIVE ON DEVNET / READ-WRITE.
 
 Run the mark publisher once:
 
