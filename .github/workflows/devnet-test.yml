@@ -10,6 +10,9 @@ name: devnet-test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - arena/**
 
 permissions:
   contents: read
