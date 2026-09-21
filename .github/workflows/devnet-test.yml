@@ -1,0 +1,152 @@
+name: devnet-test
+
+# Real devnet deployment and two-wallet acceptance test.
+#
+# The runner generates a fresh program keypair, syncs declare_id!, builds the
+# SBF artifact, deploys to devnet, bootstraps the protocol, and runs the
+# create -> fill -> cancel flow check. The deployed program id is printed in
+# the run summary; the program keypair is intentionally NOT persisted (this is
+# a one-shot test deployment, never a key-handling surface).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: devnet-test
+  cancel-in-progress: false
+
+jobs:
+  devnet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: devnet-sbf
+
+      - name: Install Agave CLI 3.0.7
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v3.0.7/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+
+      - name: Generate the program keypair and sync the declared id
+        run: |
+          mkdir -p target/deploy var/keys
+          solana-keygen new -o target/deploy/markdesk-keypair.json --no-bip39-passphrase --force
+          PROGRAM_ID="$(solana-keygen pubkey target/deploy/markdesk-keypair.json)"
+          echo "PROGRAM_ID=$PROGRAM_ID" >> "$GITHUB_ENV"
+          DECLARED="$(grep -o 'declare_id!("[^"]*")' programs/markdesk/src/lib.rs | head -1 | cut -d'"' -f2)"
+          echo "declared id in source: $DECLARED -> $PROGRAM_ID"
+          sed -i "s/$DECLARED/$PROGRAM_ID/g" programs/markdesk/src/lib.rs Anchor.toml
+          grep -n "declare_id!" programs/markdesk/src/lib.rs
+          grep -n "markdesk = " Anchor.toml
+
+      - name: Fund the deploy payer
+        env:
+          RPC_URL: https://api.devnet.solana.com
+          TARGET_LAMPORTS: "5200000000"
+        run: |
+          set -euo pipefail
+          solana config set --url devnet >/dev/null
+          PAYER=var/keys/markdesk-payer.json
+          solana-keygen new -o "$PAYER" --no-bip39-passphrase --force >/dev/null
+          PAYER_PUB="$(solana-keygen pubkey "$PAYER")"
+          echo "PAYER_PUB=$PAYER_PUB" >> "$GITHUB_ENV"
+          solana config set --keypair "$PAYER" >/dev/null
+
+          balance() {
+            curl -s "$RPC_URL" -X POST -H 'content-type: application/json' \
+              -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"$1\"]}" \
+              | jq -r '.result.value'
+          }
+
+          # Direct airdrops first (faucets are async and rate limited).
+          for i in $(seq 1 6); do
+            CUR="$(balance "$PAYER_PUB")"
+            echo "payer balance: $CUR"
+            [ "$CUR" -ge "$TARGET_LAMPORTS" ] && exit 0
+            solana airdrop 2 "$PAYER_PUB" || true
+            sleep 12
+          done
+
+          # Fallback: fund donor wallets and consolidate into the payer.
+          mkdir -p var/donors
+          for round in $(seq 1 6); do
+            CUR="$(balance "$PAYER_PUB")"
+            echo "payer balance: $CUR"
+            [ "$CUR" -ge "$TARGET_LAMPORTS" ] && exit 0
+            DONOR="var/donors/d$round.json"
+            solana-keygen new -o "$DONOR" --no-bip39-passphrase --force >/dev/null
+            DPUB="$(solana-keygen pubkey "$DONOR")"
+            for try in 1 2 3; do
+              solana airdrop 2 "$DPUB" >/dev/null 2>&1 && break
+              sleep 15
+            done
+            solana transfer --keypair "$DONOR" "$PAYER_PUB" 1.9 \
+              --allow-unfunded-recipient >/dev/null 2>&1 || true
+            sleep 6
+          done
+
+          CUR="$(balance "$PAYER_PUB")"
+          echo "final payer balance: $CUR"
+          test "$CUR" -ge "$TARGET_LAMPORTS"
+
+      - name: Build the SBF program
+        run: |
+          cargo build-sbf \
+            --manifest-path programs/markdesk/Cargo.toml \
+            --tools-version v1.54 \
+            --force-tools-install \
+            -- \
+            --locked
+          ls -l target/deploy/
+
+      - name: Deploy the program to devnet
+        run: |
+          solana program deploy target/deploy/markdesk.so \
+            --program-id target/deploy/markdesk-keypair.json
+          solana program show "$PROGRAM_ID"
+
+      - name: Bootstrap the protocol
+        run: npm run devnet:bootstrap -- --program "$PROGRAM_ID" | tee bootstrap.log
+
+      - name: Two-wallet flow check
+        run: npm run devnet:flow-check -- --program "$PROGRAM_ID" | tee flow-check.log
+
+      - name: Run summary
+        if: always()
+        run: |
+          {
+            echo "## Devnet two-wallet run"
+            echo ""
+            echo "- Program: \`${PROGRAM_ID:-unknown}\`"
+            echo "- Explorer: https://explorer.solana.com/address/${PROGRAM_ID:-unknown}?cluster=devnet"
+            echo "- Payer: \`${PAYER_PUB:-unknown}\`"
+            echo ""
+            echo "The program keypair was generated in this runner and is not persisted; the"
+            echo "deployment is a one-shot devnet test."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: devnet-run-logs
+          path: |
+            bootstrap.log
+            flow-check.log
+            var/state/devnet.json
+          if-no-files-found: ignore

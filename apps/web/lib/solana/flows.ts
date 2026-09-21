@@ -40,10 +40,11 @@ import {
 } from "./read";
 
 // Measured SBF compute for the extension-heavy fixture was 52,607 / 44,368 /
-// 33,334 CU for create / fill / cancel. Budgets below keep generous headroom.
+// 33,334 CU for create / fill / cancel. Budgets below keep generous headroom,
+// including client-side idempotent ATA creation inside the fill transaction.
 export const COMPUTE_UNIT_BUDGETS = {
   create: 150_000,
-  fill: 120_000,
+  fill: 200_000,
   cancel: 90_000,
 } as const;
 
@@ -773,7 +774,7 @@ export async function simulateSignSendConfirm(input: ExecuteInput): Promise<Send
 export async function fetchConfirmedTransaction(
   connection: Connection,
   signature: TransactionSignature,
-  attempts = 5,
+  attempts = 10,
 ) {
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     const response = await connection.getTransaction(signature, {
@@ -781,7 +782,7 @@ export async function fetchConfirmedTransaction(
       maxSupportedTransactionVersion: 0,
     });
     if (response) return response;
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    await new Promise((resolve) => setTimeout(resolve, 1_000));
   }
   return null;
 }

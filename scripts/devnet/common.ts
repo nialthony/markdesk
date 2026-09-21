@@ -11,6 +11,8 @@ import {
   Connection,
   Keypair,
   PublicKey,
+  sendAndConfirmTransaction,
+  SystemProgram,
   Transaction,
   type TransactionSignature,
 } from "@solana/web3.js";
@@ -63,28 +65,63 @@ export function keypairSigner(keypair: Keypair): {
   };
 }
 
+/**
+ * Sends a transaction with an explicit fresh blockhash. web3.js may fill one
+ * implicitly, but devnet latency makes the explicit path deterministic.
+ */
+export async function confirmTransactionWithPayer(
+  connection: Connection,
+  transaction: Transaction,
+  signers: Keypair[],
+): Promise<TransactionSignature> {
+  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  transaction.recentBlockhash = blockhash;
+  return sendAndConfirmTransaction(connection, transaction, signers, {
+    commitment: "confirmed",
+    maxRetries: 5,
+  });
+}
+
+/**
+ * Ensures a wallet holds at least `minimumLamports`. When `sponsor` is given,
+ * funds come from the sponsor (used after the deploy payer is funded once, so
+ * the devnet faucet is only hit for a single wallet); otherwise the faucet is
+ * used with retries because devnet airdrops are rate limited.
+ */
 export async function ensureSolBalance(
   connection: Connection,
   owner: PublicKey,
   minimumLamports: bigint,
+  sponsor?: Keypair,
 ): Promise<void> {
-  const balance = await connection.getBalance(owner, "confirmed");
-  if (BigInt(balance) >= minimumLamports) return;
+  const buffer = 50_000_000n;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const balance = BigInt(await connection.getBalance(owner, "confirmed"));
+    if (balance >= minimumLamports) return;
 
-  const target = 1_000_000_000; // 1 SOL
-  await connection.requestAirdrop(
-    owner,
-    Math.max(target - balance, Number(minimumLamports - BigInt(balance))),
-  );
-  // Airdrops confirm asynchronously; poll the balance instead of blocking on
-  // a single confirmTransaction window.
-  for (let attempt = 0; attempt < 15; attempt += 1) {
-    await new Promise((sleep) => setTimeout(sleep, 2_000));
-    const next = await connection.getBalance(owner, "confirmed");
-    if (BigInt(next) >= minimumLamports) return;
+    const need = minimumLamports + buffer - balance;
+    const request = need > 2_000_000_000n ? 2_000_000_000n : need;
+    try {
+      if (sponsor) {
+        const transfer = new Transaction().add(
+          SystemProgram.transfer({
+            fromPubkey: sponsor.publicKey,
+            toPubkey: owner,
+            lamports: Number(request),
+          }),
+        );
+        await confirmTransactionWithPayer(connection, transfer, [sponsor]);
+      } else {
+        await connection.requestAirdrop(owner, Number(request));
+      }
+    } catch {
+      // Faucets are rate limited and devnet drops the occasional request; retry.
+    }
+    await new Promise((sleep) => setTimeout(sleep, 5_000));
   }
   throw new Error(
-    `Airdrop to ${owner.toBase58()} did not land in time. Devnet faucets are rate limited; retry shortly.`,
+    `Could not fund ${owner.toBase58()} to ${minimumLamports.toString()} lamports. ` +
+      "Devnet airdrops are rate limited; retry shortly or fund the wallet manually.",
   );
 }
 

@@ -17,6 +17,7 @@ import { parseDecimalToRaw } from "@markdesk/core";
 import { getMint, unpackAccount, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, PublicKey } from "@solana/web3.js";
 import {
+  confirmTransactionWithPayer,
   ensureSolBalance,
   explorerTx,
   keypairSigner,
@@ -36,7 +37,6 @@ import {
 } from "../../apps/web/lib/solana/flows";
 import { readOfferState, readProtocolState } from "../../apps/web/lib/solana/read";
 import { decodeMarkAccount } from "@markdesk/core";
-import { sendAndConfirmTransaction } from "@solana/web3.js";
 
 interface StepResult {
   name: string;
@@ -94,9 +94,9 @@ async function main(): Promise<void> {
   console.log(`· maker  ${maker.keypair.publicKey.toBase58()}`);
   console.log(`· taker  ${taker.keypair.publicKey.toBase58()}`);
 
-  await ensureSolBalance(connection, maker.keypair.publicKey, 150_000_000n);
-  await ensureSolBalance(connection, taker.keypair.publicKey, 150_000_000n);
-  await ensureSolBalance(connection, publisher.keypair.publicKey, 50_000_000n);
+  await ensureSolBalance(connection, maker.keypair.publicKey, 150_000_000n, payer.keypair);
+  await ensureSolBalance(connection, taker.keypair.publicKey, 150_000_000n, payer.keypair);
+  await ensureSolBalance(connection, publisher.keypair.publicKey, 50_000_000n, payer.keypair);
 
   // Inventory top-ups so the run is repeatable.
   // Read the base mint's live decimals after confirming the program is reachable.
@@ -119,9 +119,7 @@ async function main(): Promise<void> {
       amountRaw: targetRaw - current,
     });
     transaction.feePayer = payer.keypair.publicKey;
-    await sendAndConfirmTransaction(connection, transaction, [payer.keypair], {
-      commitment: "confirmed",
-    });
+    await confirmTransactionWithPayer(connection, transaction, [payer.keypair]);
     console.log(`· Topped up ${label}`);
   }
   // Rough gross-up headroom: two creates plus fee legs.
@@ -145,12 +143,9 @@ async function main(): Promise<void> {
     observedAtSeconds: BigInt(Math.floor(Date.now() / 1000)),
     sequence: previous.sequence + 1n,
   });
-  const publishSignature = await sendAndConfirmTransaction(
-    connection,
-    publishTransaction,
-    [publisher.keypair],
-    { commitment: "confirmed" },
-  );
+  const publishSignature = await confirmTransactionWithPayer(connection, publishTransaction, [
+    publisher.keypair,
+  ]);
   console.log(`· Fresh mark seq ${previous.sequence + 1n} — ${explorerTx(publishSignature)}`);
 
   const results: StepResult[] = [];
@@ -175,7 +170,7 @@ async function main(): Promise<void> {
     maker: maker.keypair.publicKey,
     buyerNetTargetRaw: buyerNetRaw,
     offsetBps: -300,
-    expiresAtSeconds: BigInt(createRead.nowSeconds + 3_600),
+    expiresAtSeconds: BigInt(createRead.nowSeconds + 3_600 + 60),
     offerId: BigInt(Date.now()) * 1_000n,
   });
   if (!createPlan.ok) {
@@ -231,7 +226,7 @@ async function main(): Promise<void> {
     maker: maker.keypair.publicKey,
     buyerNetTargetRaw: buyerNetRaw,
     offsetBps: 0,
-    expiresAtSeconds: BigInt(createRead2.nowSeconds + 3_600),
+    expiresAtSeconds: BigInt(createRead2.nowSeconds + 3_600 + 60),
     offerId: BigInt(Date.now()) * 1_000n + 1n,
   });
   if (!createPlan2.ok) {

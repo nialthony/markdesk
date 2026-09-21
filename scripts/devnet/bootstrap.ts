@@ -21,8 +21,9 @@ import {
   MARKDESK_PROGRAM_ID_PLACEHOLDER,
 } from "@markdesk/core";
 import { getMint, unpackAccount, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
-import { Connection, PublicKey, sendAndConfirmTransaction, Keypair } from "@solana/web3.js";
+import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import {
+  confirmTransactionWithPayer,
   DEFAULT_DEVNET_RPC,
   ensureSolBalance,
   explorerAddress,
@@ -52,13 +53,10 @@ const MAX_MARK_AGE_SECONDS = 300;
 async function sendPayer(
   connection: Connection,
   payer: Keypair,
-  transaction: Parameters<typeof sendAndConfirmTransaction>[1],
+  transaction: Transaction,
   extraSigners: Keypair[] = [],
 ): Promise<string> {
-  return sendAndConfirmTransaction(connection, transaction, [payer, ...extraSigners], {
-    commitment: "confirmed",
-    maxRetries: 5,
-  });
+  return confirmTransactionWithPayer(connection, transaction, [payer, ...extraSigners]);
 }
 
 async function main(): Promise<void> {
@@ -102,10 +100,11 @@ async function main(): Promise<void> {
       console.log(`· Created keypair ${entry.path} (back it up; it is gitignored)`);
     }
   }
+  // Only the payer touches the faucet; everything else is sponsored from it.
   await ensureSolBalance(connection, payer.keypair.publicKey, 400_000_000n);
-  await ensureSolBalance(connection, publisher.keypair.publicKey, 100_000_000n);
-  await ensureSolBalance(connection, maker.keypair.publicKey, 100_000_000n);
-  await ensureSolBalance(connection, taker.keypair.publicKey, 100_000_000n);
+  await ensureSolBalance(connection, publisher.keypair.publicKey, 100_000_000n, payer.keypair);
+  await ensureSolBalance(connection, maker.keypair.publicKey, 100_000_000n, payer.keypair);
+  await ensureSolBalance(connection, taker.keypair.publicKey, 100_000_000n, payer.keypair);
 
   // 3. Base mint: explicit --base-mint, existing synthetic, or a fresh one.
   let baseMint: PublicKey;
@@ -204,12 +203,9 @@ async function main(): Promise<void> {
     sequence,
   });
   publishTransaction.feePayer = publisher.keypair.publicKey;
-  const publishSignature = await sendAndConfirmTransaction(
-    connection,
-    publishTransaction,
-    [publisher.keypair],
-    { commitment: "confirmed", maxRetries: 5 },
-  );
+  const publishSignature = await confirmTransactionWithPayer(connection, publishTransaction, [
+    publisher.keypair,
+  ]);
   console.log(
     `· Published mark seq ${sequence} at $${mark.markPrice.toFixed(2)} (${mark.source} ANDURIL reference) — ${explorerTx(publishSignature)}`,
   );
