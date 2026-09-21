@@ -79,6 +79,8 @@ jobs:
           PAYER_PUB="$(solana-keygen pubkey "$PAYER_KEY")"
           echo "PAYER_PUB=$PAYER_PUB" >> "$GITHUB_ENV"
           echo "payer (persistent): $PAYER_PUB"
+          # Deploy signs with the payer (upgrade authority), not a runner default keypair.
+          solana config set --keypair "$PAYER_KEY" >/dev/null
 
           balance() {
             for t in 1 2 3; do
