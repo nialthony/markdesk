@@ -7,6 +7,9 @@ name: devnet-test
 # create -> fill -> cancel flow check. The deployed program id is printed in
 # the run summary; the program keypair is intentionally NOT persisted (this is
 # a one-shot test deployment, never a key-handling surface).
+#
+# Run logs are posted as comments on the anchor issue so they can be read
+# without log-download access to the actions blob storage.
 
 on:
   workflow_dispatch:
@@ -16,6 +19,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: devnet-test
@@ -30,7 +34,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci
@@ -64,49 +68,61 @@ jobs:
           TARGET_LAMPORTS: "5200000000"
         run: |
           set -euo pipefail
+          exec > >(tee funding.log) 2>&1
           solana config set --url devnet >/dev/null
           PAYER=var/keys/markdesk-payer.json
           solana-keygen new -o "$PAYER" --no-bip39-passphrase --force >/dev/null
           PAYER_PUB="$(solana-keygen pubkey "$PAYER")"
           echo "PAYER_PUB=$PAYER_PUB" >> "$GITHUB_ENV"
           solana config set --keypair "$PAYER" >/dev/null
+          echo "payer: $PAYER_PUB target: $TARGET_LAMPORTS"
 
           balance() {
-            curl -s "$RPC_URL" -X POST -H 'content-type: application/json' \
-              -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"$1\"]}" \
-              | jq -r '.result.value'
+            for t in 1 2 3; do
+              local v
+              v="$(curl -s --max-time 10 "$RPC_URL" -X POST -H 'content-type: application/json' \
+                -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"getBalance\",\"params\":[\"$1\"]}" \
+                | jq -r '.result.value // empty' || true)"
+              if [ -n "$v" ] && [ "$v" != "null" ]; then
+                echo "$v"
+                return 0
+              fi
+              sleep 3
+            done
+            solana balance "$1" --url devnet --output json 2>/dev/null | jq -r '.lamports // 0'
           }
 
           # Direct airdrops first (faucets are async and rate limited).
-          for i in $(seq 1 6); do
+          for i in $(seq 1 8); do
             CUR="$(balance "$PAYER_PUB")"
-            echo "payer balance: $CUR"
-            [ "$CUR" -ge "$TARGET_LAMPORTS" ] && exit 0
-            solana airdrop 2 "$PAYER_PUB" || true
-            sleep 12
+            echo "[direct $i] payer balance: $CUR"
+            if [ "${CUR:-0}" -ge "$TARGET_LAMPORTS" ]; then exit 0; fi
+            solana airdrop 2 "$PAYER_PUB" || echo "[direct $i] airdrop failed"
+            sleep 15
           done
 
           # Fallback: fund donor wallets and consolidate into the payer.
           mkdir -p var/donors
-          for round in $(seq 1 6); do
+          for round in $(seq 1 8); do
             CUR="$(balance "$PAYER_PUB")"
-            echo "payer balance: $CUR"
-            [ "$CUR" -ge "$TARGET_LAMPORTS" ] && exit 0
+            echo "[donor $round] payer balance: $CUR"
+            if [ "${CUR:-0}" -ge "$TARGET_LAMPORTS" ]; then exit 0; fi
             DONOR="var/donors/d$round.json"
             solana-keygen new -o "$DONOR" --no-bip39-passphrase --force >/dev/null
             DPUB="$(solana-keygen pubkey "$DONOR")"
             for try in 1 2 3; do
-              solana airdrop 2 "$DPUB" >/dev/null 2>&1 && break
+              if solana airdrop 2 "$DPUB"; then break; fi
+              echo "[donor $round] airdrop try $try failed"
               sleep 15
             done
             solana transfer --keypair "$DONOR" "$PAYER_PUB" 1.9 \
-              --allow-unfunded-recipient >/dev/null 2>&1 || true
+              --allow-unfunded-recipient || echo "[donor $round] transfer failed"
             sleep 6
           done
 
           CUR="$(balance "$PAYER_PUB")"
           echo "final payer balance: $CUR"
-          test "$CUR" -ge "$TARGET_LAMPORTS"
+          test "${CUR:-0}" -ge "$TARGET_LAMPORTS"
 
       - name: Build the SBF program
         run: |
@@ -121,34 +137,55 @@ jobs:
       - name: Deploy the program to devnet
         run: |
           solana program deploy target/deploy/markdesk.so \
-            --program-id target/deploy/markdesk-keypair.json
+            --program-id target/deploy/markdesk-keypair.json 2>&1 | tee deploy.log
           solana program show "$PROGRAM_ID"
 
       - name: Bootstrap the protocol
-        run: npm run devnet:bootstrap -- --program "$PROGRAM_ID" | tee bootstrap.log
+        run: npm run devnet:bootstrap -- --program "$PROGRAM_ID" 2>&1 | tee bootstrap.log
 
       - name: Two-wallet flow check
-        run: npm run devnet:flow-check -- --program "$PROGRAM_ID" | tee flow-check.log
+        run: npm run devnet:flow-check -- --program "$PROGRAM_ID" 2>&1 | tee flow-check.log
 
-      - name: Run summary
+      - name: Post run logs to the anchor issue
         if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: "1"
         run: |
           {
-            echo "## Devnet two-wallet run"
+            echo "### devnet-test run ${GITHUB_RUN_ID}"
             echo ""
+            echo "- Commit: ${GITHUB_SHA}"
             echo "- Program: \`${PROGRAM_ID:-unknown}\`"
-            echo "- Explorer: https://explorer.solana.com/address/${PROGRAM_ID:-unknown}?cluster=devnet"
             echo "- Payer: \`${PAYER_PUB:-unknown}\`"
+            echo "- Job status: ${{ job.status }}"
             echo ""
-            echo "The program keypair was generated in this runner and is not persisted; the"
-            echo "deployment is a one-shot devnet test."
-          } >> "$GITHUB_STEP_SUMMARY"
+            for f in funding.log deploy.log bootstrap.log flow-check.log; do
+              if [ -f "$f" ]; then
+                echo "<details><summary><code>$f</code></summary>"
+                echo ""
+                echo '```'
+                tail -c 12000 "$f"
+                echo ""
+                echo '```'
+                echo "</details>"
+                echo ""
+              fi
+            done
+          } > comment.md
+          curl -s -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" \
+            -d "{\"body\": $(jq -Rs . comment.md)}" | jq -r '.html_url // "comment failed"'
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: devnet-run-logs
           path: |
+            funding.log
+            deploy.log
             bootstrap.log
             flow-check.log
             var/state/devnet.json
