@@ -30,8 +30,12 @@ function shortMint(mint: string): string {
 }
 
 export function MarketBoard({ catalog }: { catalog: MarketCatalog }) {
+  // On devnet the synthetic bootstrap mint is the tradable row; prefer it.
+  const demoMint = process.env.NEXT_PUBLIC_DEMO_BASE_MINT?.trim();
   const initial =
-    catalog.assets.find((asset) => asset.mint === MARKDESK_FLAGSHIP_MINT) ?? catalog.assets[0];
+    catalog.assets.find((asset) => asset.mint === demoMint) ??
+    catalog.assets.find((asset) => asset.mint === MARKDESK_FLAGSHIP_MINT) ??
+    catalog.assets[0];
   const [selectedSymbol, setSelectedSymbol] = useState(initial?.symbol ?? "");
   const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");

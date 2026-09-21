@@ -183,6 +183,7 @@ export default async function Home() {
             ["Withheld-fee vault closure", "CODED"],
             ["Anchor settlement core", "SBF-TESTED"],
             ["Wallet transaction flows", "CLIENT-READY"],
+            ["Devnet bootstrap + flow-check", "SCRIPTED"],
             ["Devnet two-wallet test", "PENDING"],
           ].map(([label, status]) => (
             <div className="statusRow" key={label}>

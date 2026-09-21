@@ -856,6 +856,10 @@ button {
   font: 700 8px/1 var(--mono);
   color: var(--muted);
 }
+.statusRow strong[data-status="CLIENT-READY"],
+.statusRow strong[data-status="SCRIPTED"] {
+  color: var(--blue);
+}
 .statusRow strong[data-status="DONE"],
 .statusRow strong[data-status="TESTED"] {
   color: var(--acid);

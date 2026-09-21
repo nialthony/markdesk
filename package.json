@@ -11,13 +11,17 @@
   "scripts": {
     "dev": "npm run dev --workspace @markdesk/web",
     "build": "npm run build --workspaces --if-present",
-    "check": "npm run typecheck:tools && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
+    "check": "npm run typecheck:tools && npm run test:scripts && npm run typecheck --workspaces --if-present && npm run test --workspaces --if-present",
     "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json",
+    "test:scripts": "tsx --test scripts/devnet/common.test.ts",
     "test": "npm run test --workspaces --if-present",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "publisher": "npm run start --workspace @markdesk/publisher",
-    "inspect:mints": "tsx scripts/inspect-prestocks.ts"
+    "inspect:mints": "tsx scripts/inspect-prestocks.ts",
+    "devnet:bootstrap": "tsx scripts/devnet/bootstrap.ts",
+    "devnet:flow-check": "tsx scripts/devnet/flow-check.ts",
+    "devnet:program-id": "tsx scripts/devnet/program-id.ts"
   },
   "engines": {
     "node": ">=20.9"

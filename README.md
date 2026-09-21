@@ -77,6 +77,22 @@ re-reads balances, vault/Offer closure, and the Anchor settlement event. Until t
 deployed on the target cluster the console lists its honest blockers; the app keeps its read-only
 protocol preview label until the devnet two-wallet run is verified.
 
+### Devnet deployment and two-wallet test
+
+Follow [`docs/DEVNET_RUNBOOK.md`](docs/DEVNET_RUNBOOK.md). In short: fix the program id
+(`anchor keys sync` or `scripts/devnet/program-id.ts`), `cargo build-sbf`, `solana program deploy`,
+then:
+
+```bash
+npm run devnet:bootstrap -- --program <deployed-program-id>   # synthetic mint, config, mark, funded wallets
+npm run devnet:flow-check -- --program <deployed-program-id>  # two-wallet create → fill → cancel, verified
+```
+
+The bootstrap prints the exact `apps/web/.env.local` block, including the synthetic
+`SYN-ANDURIL` demo mint, so the whole console works on devnet against a Token-2022 mint with the
+PreStocks extension profile. Until the runbook's checklist is completed on devnet, the UI keeps
+its read-only protocol preview label.
+
 Run the mark publisher once:
 
 ```bash

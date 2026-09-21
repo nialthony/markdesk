@@ -646,7 +646,7 @@ export interface ExecuteInput {
   connection: Connection;
   signer: TransactionSigner;
   transaction: Transaction;
-  onStage?: (stage: StageName, detail?: string) => void;
+  onStage?: ((stage: StageName, detail?: string) => void) | undefined;
 }
 
 /** Pulls the Anchor error line out of raw logs so the receipt stays readable. */
@@ -813,7 +813,7 @@ export async function runCreateOfferFlow(input: {
   clusterProgramId: PublicKey;
   signer: TransactionSigner;
   plan: CreateOfferPlan;
-  onStage?: (stage: StageName, detail?: string) => void;
+  onStage?: ((stage: StageName, detail?: string) => void) | undefined;
 }): Promise<FlowOutcome> {
   const { connection, signer, plan, onStage } = input;
   const transaction = buildCreateOfferTransaction({
@@ -918,7 +918,7 @@ export async function runFillOfferFlow(input: {
   clusterProgramId: PublicKey;
   signer: TransactionSigner;
   plan: FillOfferPlan;
-  onStage?: (stage: StageName, detail?: string) => void;
+  onStage?: ((stage: StageName, detail?: string) => void) | undefined;
 }): Promise<FlowOutcome> {
   const { connection, signer, plan, onStage } = input;
   const transaction = buildFillOfferTransaction({
@@ -1055,7 +1055,7 @@ export async function runCancelOfferFlow(input: {
   clusterProgramId: PublicKey;
   signer: TransactionSigner;
   plan: CancelOfferPlan;
-  onStage?: (stage: StageName, detail?: string) => void;
+  onStage?: ((stage: StageName, detail?: string) => void) | undefined;
 }): Promise<FlowOutcome> {
   const { connection, signer, plan, onStage } = input;
   const transaction = buildCancelOfferTransaction({

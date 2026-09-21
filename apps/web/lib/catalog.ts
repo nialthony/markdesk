@@ -1,4 +1,11 @@
-import { normalizePreStocks, type MarketCatalog } from "@markdesk/core";
+import {
+  MARKDESK_FLAGSHIP_MINT,
+  normalizePreStocks,
+  PRESTOCKS_MINTS,
+  type MarketCatalog,
+  type PreStockAsset,
+} from "@markdesk/core";
+import { PublicKey } from "@solana/web3.js";
 import fallbackSnapshot from "../../../fixtures/prestocks.snapshot.json";
 
 const SOURCE_URL = process.env.PRESTOCKS_API_URL ?? "https://prestocks.com/api/prestocks";
@@ -9,6 +16,41 @@ interface FallbackSnapshot {
   capturedAt: string;
   label: string;
   assets: unknown;
+}
+
+/**
+ * Appends the devnet synthetic asset when `NEXT_PUBLIC_DEMO_BASE_MINT` is set
+ * (written by the devnet bootstrap). It reuses the official ANDURIL mark so
+ * the whole console — chain read, signed bounds, settlement — can be exercised
+ * on devnet against a Token-2022 mint that actually exists there.
+ */
+export function withDemoAsset(assets: PreStockAsset[]): PreStockAsset[] {
+  const mint = process.env.NEXT_PUBLIC_DEMO_BASE_MINT?.trim();
+  if (!mint) return assets;
+  try {
+    new PublicKey(mint);
+  } catch {
+    console.warn("NEXT_PUBLIC_DEMO_BASE_MINT is not a valid public key; ignoring it.");
+    return assets;
+  }
+
+  const anchorAsset = assets.find((asset) => asset.mint === MARKDESK_FLAGSHIP_MINT) ?? assets[0];
+  if (!anchorAsset) return assets;
+
+  const symbol = process.env.NEXT_PUBLIC_DEMO_BASE_SYMBOL?.trim() || "SYN-ANDURIL";
+  return [
+    ...assets,
+    {
+      ...anchorAsset,
+      mint,
+      symbol,
+      name: "Devnet Synthetic Anduril",
+      description:
+        "Bootstrap fixture mint that replicates the PreStocks Token-2022 extension profile for devnet testing.",
+      tokenPrice: anchorAsset.markPrice,
+      premiumBps: 0,
+    },
+  ];
 }
 
 export async function getMarketCatalog(): Promise<MarketCatalog> {
@@ -25,7 +67,7 @@ export async function getMarketCatalog(): Promise<MarketCatalog> {
       sourceUrl: SOURCE_URL,
       observedAt: new Date().toISOString(),
       label: "Live PreStocks API",
-      assets: normalizePreStocks(await response.json()),
+      assets: withDemoAsset(normalizePreStocks(await response.json())),
     };
   } catch (error) {
     const fixture = fallbackSnapshot as FallbackSnapshot;
@@ -38,7 +80,7 @@ export async function getMarketCatalog(): Promise<MarketCatalog> {
       sourceUrl: fixture.source,
       observedAt: fixture.capturedAt,
       label: fixture.label,
-      assets: normalizePreStocks(fixture.assets),
+      assets: withDemoAsset(normalizePreStocks(fixture.assets)),
     };
   }
 }

@@ -140,7 +140,7 @@ export function hexToBase58(hex: string): string {
 
 function decodeMintInsights(
   mintAddress: PublicKey,
-  info: AccountInfo<Buffer> | null,
+  info: AccountInfo<Buffer> | null | undefined,
   clusterTimestampSeconds: number,
   epoch: bigint,
 ): MintInsights | null {

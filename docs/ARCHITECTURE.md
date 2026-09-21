@@ -52,6 +52,16 @@ Signed execution bounds prevent configuration races: create includes a minimum e
 
 A separate Rust workspace builds MarkDesk as SBF, runs it through `solana-program-test` 3.0.7, and uses that runtime's SBF Token-2022 and associated-token-account fixtures. Its synthetic base mint carries transfer-fee, default-state, permanent-delegate, inactive-hook, pausable, and scaled-UI extensions. The suite executes fee-bearing create → fill and create → cancel, proves atomic failures for every signed settlement bound, inspects withheld amounts, and verifies vault/offer closure. CI also enforces measured compute ceilings; see the [dated SBF report](../research/TOKEN_2022_SBF_VALIDATION_2026-09-20.md).
 
+### `scripts/devnet`
+
+Deployment and acceptance tooling for the devnet milestone. `bootstrap.ts` is an idempotent
+operator that creates throwaway keypairs under `var/keys` (never committed), a synthetic
+Token-2022 base mint replicating the PreStocks extension profile, a 6-decimal quote mint, the
+protocol config, a fresh mark at the official ANDURIL price, and funded maker/taker wallets;
+`flow-check.ts` runs the two-wallet create → fill → cancel acceptance test through the exact same
+flow functions as the web console and exits non-zero unless every step re-verifies on-chain.
+The full procedure lives in the [devnet runbook](DEVNET_RUNBOOK.md).
+
 ### `apps/web`
 
 The market board renders live/fallback PreStocks data. The execution console implements the wallet

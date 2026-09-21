@@ -21,9 +21,10 @@ This file will become the one-sitting evaluation path for the Stocklana submissi
 2. The nav cluster pill shows the resolved cluster (Devnet by default). `?offer=<address>` deep-links the Fill tab.
 3. Connect a Wallet Standard wallet (Phantom, Solflare, or Backpack). The Sell tab performs a chain read: program deployment, config, mark price/sequence/age, active and scheduled fee epochs, active and pending scaled-UI multipliers, pause state, transfer hook, issuer controls, and your balances.
 4. Until the program is deployed on that cluster, the console lists honest blockers instead of enabling execution — that is the expected read-only preview state, not a bug.
-5. On a bootstrapped cluster (localnet or devnet after the deployment milestone), the maker flow shows the gross deposit, both fee legs, buyer net, and the signed minimum-escrow bound, then simulates before requesting a signature, sends, confirms blockheight-aware, and re-reads the Offer PDA, vault, balances, and `OfferCreated` event. Success renders only when every check passes.
-6. The Fill tab accepts an offer address (or deep link), shows the three signed bounds (mark sequence, minimum buyer net, maximum quote), and verifies closure of the offer and vault, exact quote deltas on both sides, withheld fee, and the `OfferFilled` event.
-7. The Cancel tab verifies the maker's net return, withheld fee, and closure against the `OfferCancelled` event.
+5. On a bootstrapped devnet (follow `docs/DEVNET_RUNBOOK.md`), the board shows the `SYN-ANDURIL` synthetic row with the official ANDURIL mark, and the full UI flow works with two devnet wallets.
+6. The maker flow shows the gross deposit, both fee legs, buyer net, and the signed minimum-escrow bound, then simulates before requesting a signature, sends, confirms blockheight-aware, and re-reads the Offer PDA, vault, balances, and `OfferCreated` event. Success renders only when every check passes.
+7. The Fill tab accepts an offer address (or deep link), shows the three signed bounds (mark sequence, minimum buyer net, maximum quote), and verifies closure of the offer and vault, exact quote deltas on both sides, withheld fee, and the `OfferFilled` event.
+8. The Cancel tab verifies the maker's net return, withheld fee, and closure against the `OfferCancelled` event.
 
 ## Final submission path (not complete)
 
