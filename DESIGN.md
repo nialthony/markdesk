@@ -38,9 +38,9 @@ motion limited to hover states and short functional transitions.
 
 ## Decision log (R-31: one-line reason per major decision)
 
-- Logo mark: a single reference line with two dots offset above and below it
-  ("the offset mark"); it is the product's mechanism drawn flat, reads at
-  16px, and carries the accent. (identity, R-23/R-31)
+- Logo mark: two opposing chevrons (the "double chevron M"), an abstraction
+  of the letter M that also reads as the bid above and the ask below the
+  mark; flat single-color geometry that holds at 16px. (identity, R-23/R-31)
 
 - Dark theme default: a trading terminal for a professional desk; dark is the
   product's native environment, not a "tech" costume. (R-21)
