@@ -38,9 +38,10 @@ motion limited to hover states and short functional transitions.
 
 ## Decision log (R-31: one-line reason per major decision)
 
-- Logo mark: a geometric M monogram, one squared-off stroke (the owner's
-  pick); flat single-color amber, terminal-precise, legible at 16px.
-  (identity, R-23/R-31)
+- Logo mark: the owner's reference M (docs/assets/logo-reference.png),
+  reconstructed as a slab M whose center V reaches almost to the baseline,
+  split two-tone with the left half over the right at the crossing. Mapped to
+  the system palette: left var(--text), right the amber accent. (R-23/R-31)
 
 - Dark theme default: a trading terminal for a professional desk; dark is the
   product's native environment, not a "tech" costume. (R-21)

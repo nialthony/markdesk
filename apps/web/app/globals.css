@@ -91,10 +91,15 @@ input {
   letter-spacing: 0.02em;
 }
 .logoGlyph {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: auto;
   display: block;
-  color: var(--accent);
+}
+.logoGlyphLeft {
+  fill: var(--text);
+}
+.logoGlyphRight {
+  fill: var(--accent);
 }
 .navLinks {
   display: flex;
