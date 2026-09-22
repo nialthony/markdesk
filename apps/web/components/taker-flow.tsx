@@ -2,7 +2,6 @@
 
 import { PRESTOCKS_MINTS, type PreStockAsset } from "@markdesk/core";
 import { PublicKey } from "@solana/web3.js";
-import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Blockers,
@@ -36,8 +35,6 @@ function signedPercent(bps: number): string {
 export function TakerFlow({ assets }: { assets: PreStockAsset[] }) {
   const wallet = useWallet();
   const signer = useSigner();
-  const params = useSearchParams();
-
   const [offerInput, setOfferInput] = useState("");
   const [read, setRead] = useState<OfferRead | null>(null);
   const [reading, setReading] = useState(false);
@@ -47,10 +44,13 @@ export function TakerFlow({ assets }: { assets: PreStockAsset[] }) {
 
   const cluster = useMemo(() => resolveCluster(), []);
 
+  // Read the ?offer= deep link once on mount. Effects only run client-side,
+  // so this cannot diverge from the prerendered shell (no useSearchParams CSR
+  // bailout, no hydration mismatch when the link opens with a param).
   useEffect(() => {
-    const seeded = params.get("offer");
+    const seeded = new URLSearchParams(window.location.search).get("offer");
     if (seeded) setOfferInput(seeded);
-  }, [params]);
+  }, []);
 
   const loadOffer = useCallback(
     async (address: string, walletKey: PublicKey | null) => {

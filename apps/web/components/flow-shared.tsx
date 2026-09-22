@@ -76,24 +76,65 @@ export function BoundsCard({ rows, note }: { rows: BoundRow[]; note?: ReactNode 
   );
 }
 
+/**
+ * Copies text where the async Clipboard API is policy-blocked (embedded
+ * previews, iframes without clipboard-write) by falling back to the legacy
+ * execCommand path. Returns whether the value actually reached the clipboard.
+ */
+async function copyText(value: string): Promise<boolean> {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch {
+      // NotAllowedError et al.: fall through to the legacy path.
+    }
+  }
+  try {
+    const area = document.createElement("textarea");
+    area.value = value;
+    area.setAttribute("readonly", "");
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    const copied = document.execCommand("copy");
+    area.remove();
+    return copied;
+  } catch {
+    return false;
+  }
+}
+
 export function CopyButton({ value, label }: { value: string; label: string }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<"idle" | "copied" | "blocked">("idle");
   useEffect(() => {
-    if (!copied) return;
-    const timer = setTimeout(() => setCopied(false), 1600);
+    if (state === "idle") return;
+    const timer = setTimeout(() => setState("idle"), 2400);
     return () => clearTimeout(timer);
-  }, [copied]);
+  }, [state]);
 
   return (
-    <button
-      type="button"
-      className="copyButton"
-      onClick={() => {
-        void navigator.clipboard?.writeText(value).then(() => setCopied(true));
-      }}
-    >
-      {copied ? "COPIED" : label}
-    </button>
+    <span className="copyWrap">
+      <button
+        type="button"
+        className="copyButton"
+        onClick={() => {
+          void copyText(value).then((copied) => setState(copied ? "copied" : "blocked"));
+        }}
+      >
+        {state === "copied" ? "COPIED" : state === "blocked" ? "COPY BLOCKED" : label}
+      </button>
+      {state === "blocked" ? (
+        <input
+          className="copyFallback"
+          readOnly
+          value={value}
+          onFocus={(event) => event.currentTarget.select()}
+          aria-label={`${label.toLowerCase()}, select and copy manually`}
+        />
+      ) : null}
+    </span>
   );
 }
 

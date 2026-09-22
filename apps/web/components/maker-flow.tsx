@@ -53,6 +53,9 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
 
   const [amount, setAmount] = useState("0.25");
   const [offsetBps, setOffsetBps] = useState(-300);
+  // The offer link needs the page origin; resolve it after mount so render
+  // output never branches on typeof window.
+  const [origin, setOrigin] = useState("");
   const [expiryHours, setExpiryHours] = useState(24);
   const [offerId, setOfferId] = useState<bigint>(() => generateOfferId());
   const [read, setRead] = useState<ProtocolRead | null>(null);
@@ -69,6 +72,10 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
   const baseDecimals = read?.baseMint?.decimals ?? 9;
   const quoteDecimals = read?.quoteMint?.decimals ?? 6;
   const quoteSymbol = "USDC";
+
+  useEffect(() => {
+    setOrigin(window.location.origin);
+  }, []);
 
   const refreshRead = useCallback(
     async (walletKey: PublicKey | null) => {
@@ -411,7 +418,7 @@ export function MakerFlow({ asset }: { asset: PreStockAsset }) {
                         </div>
                         <CopyButton value={executedPlan.offerAddress} label="COPY ADDRESS" />
                         <CopyButton
-                          value={`${typeof window !== "undefined" ? window.location.origin : ""}/?offer=${executedPlan.offerAddress}#market`}
+                          value={`${origin}/?offer=${executedPlan.offerAddress}#market`}
                           label="COPY OFFER LINK"
                         />
                       </div>
