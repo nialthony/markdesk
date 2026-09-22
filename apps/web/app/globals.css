@@ -90,15 +90,11 @@ input {
   font: 640 16px/1 var(--serif);
   letter-spacing: 0.02em;
 }
-.logoMark {
-  width: 31px;
-  height: 31px;
-  display: grid;
-  place-items: center;
-  background: var(--accent);
-  color: var(--ink);
-  font: 900 15px/1 var(--sans);
-  clip-path: polygon(0 0, 82% 0, 100% 18%, 100% 100%, 18% 100%, 0 82%);
+.logoGlyph {
+  width: 26px;
+  height: 26px;
+  display: block;
+  color: var(--accent);
 }
 .navLinks {
   display: flex;
